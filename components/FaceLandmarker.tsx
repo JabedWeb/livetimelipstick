@@ -6,7 +6,7 @@ export default function FaceLandmarkerComponent() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
-  const lipColorRef = useRef("#FF3030"); // ✅ Use useRef instead of state
+  const lipColorRef = useRef("#FF3030"); // Default lipstick color
 
   useEffect(() => {
     async function loadModel() {
@@ -46,11 +46,53 @@ export default function FaceLandmarkerComponent() {
 
       if (results.faceLandmarks) {
         const drawingUtils = new DrawingUtils(ctx!);
+
+
+        //  61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 61, // Outer lip
+        //     185, 40, 39, 37, 0, 267, 269, 270, 409, 291, // Extra top-lip details
+        //     78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 78, // Inner lip
+        //     191, 80, 81, 82, 13, 312, 311, 310, 415, 308 // Extra lower-lip details
+
         for (const landmarks of results.faceLandmarks) {
+          // Get lip landmarks
+          const outerLipPoints = [
+            61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 61,
+            185, 40, 39, 37, 0, 267, 269, 270, 409, 291,
+          ].map(index => ({
+            x: landmarks[index].x * canvas.width,
+            y: landmarks[index].y * canvas.height,
+          }));
+
+          const innerLipPoints = [
+            78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 78,
+            191, 80, 81, 82, 13, 312, 311, 310, 415, 308
+          ].map(index => ({
+            x: landmarks[index].x * canvas.width,
+            y: landmarks[index].y * canvas.height,
+          }));
+
+          // Start drawing lips
+          ctx!.beginPath();
+
+          // Draw outer lip shape
+          ctx!.moveTo(outerLipPoints[0].x, outerLipPoints[0].y);
+          outerLipPoints.forEach((point) => ctx!.lineTo(point.x, point.y));
+          ctx!.closePath();
+
+          // Create a separate path for the inner lips (mouth opening)
+          ctx!.moveTo(innerLipPoints[0].x, innerLipPoints[0].y);
+          innerLipPoints.forEach((point) => ctx!.lineTo(point.x, point.y));
+          ctx!.closePath();
+
+          // Use "evenodd" fill rule to remove the inside of the mouth
+          ctx!.fillStyle = lipColorRef.current;
+          ctx!.fill("evenodd");
+
+          // Draw Lip Outline for Better Look
           drawingUtils.drawConnectors(
             landmarks,
             FaceLandmarker.FACE_LANDMARKS_LIPS,
-            { color: lipColorRef.current, lineWidth: 4 } // ✅ Reads latest color from useRef
+            { color: "black", lineWidth: 1 } // Thin outline for natural look
           );
         }
       }
