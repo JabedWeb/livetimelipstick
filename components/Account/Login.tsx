@@ -35,7 +35,7 @@ const Login = () => {
           </form>
 
           <div className='mt-2'>
-            <p>Don't have an account? <a href="#">Sign up</a></p>
+            <p>Don&apos;t have an account? <a className='font-semibold' href="#">Sign up</a></p>
           </ div>
         </div>
     </div>
