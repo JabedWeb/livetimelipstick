@@ -1,6 +1,6 @@
 import React from 'react'
 import { FaStar } from "react-icons/fa";
-
+import { GrFavorite } from "react-icons/gr";
 
 const Shop_grid = () => {
   const products=[
@@ -46,6 +46,7 @@ const Shop_grid = () => {
             <div >
               <img src={product.image} alt={product.name} className='w-full'/>
             </div>
+            <GrFavorite className='absolute right-5 top-5'/>
             <button className='bg-black hidden absolute left-0 bottom-[100px] group-hover:block text-white inline-block w-full py-2 px-2 rounded-md'>Add To Cart</button>
             <h1 className='text-lg font-semibold mt-4'>{product.name}</h1>
             <div className='flex items-center'>
