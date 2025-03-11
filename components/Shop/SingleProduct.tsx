@@ -1,152 +1,205 @@
 'use client';
 
 import { useState } from 'react';
+import { FiCamera, FiRotateCw } from 'react-icons/fi';
 
-const SingleProduct = () => {
-  const product = {
-    productId: 101,
-    name: "Classic T-Shirt",
-    thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRocVKsmNzdbVQ1HX8l4AzLQS7YriJGMnWFrg&s",
-    variants: [
-      {
-        color: "Black",
-        images: [
-          "https://www.gymreapers.com/cdn/shop/files/basic-shirt-black-black-back_f6aa691e-9153-4436-8756-2c699d7c9fea.jpg?v=1725491870&width=3547",
-          "https://blucheez.fashion/cdn/shop/files/black-formal-shirt-blucheez-1copy.webp?v=1697296290"
-        ],
-        sizes: [
-          {
-            size: "S",
-            stock: 20,
-            price: 19.99,
-            sku: "TSHIRT-BLK-S"
-          },
-          {
-            size: "M",
-            stock: 10,
-            price: 19.99,
-            sku: "TSHIRT-BLK-M"
-          }
-        ]
-      },
-      {
-        color: "White",
-        images: [
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRocVKsmNzdbVQ1HX8l4AzLQS7YriJGMnWFrg&s",
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUOY4SRdSvgbWvpBY-xAkYtpSORB7DEwUK2A&s"
-        ],
-        sizes: [
-          {
-            size: "L",
-            stock: 0,
-            price: 19.99,
-            sku: "TSHIRT-WHT-L"
-          },
-          {
-            size: "XL",
-            stock: 5,
-            price: 19.99,
-            sku: "TSHIRT-WHT-XL"
-          }
-        ]
-      }
-    ]
+
+interface StockInfo {
+  [color : string]: {
+    stock: {[size : string]: number},
+    image: string,
+  }
+}
+
+
+interface Product {
+  productId: number,
+  name: string,
+  price: number,
+  description: string,
+  rating: number,
+  reviews: number,
+  points: number,
+  stockInfo: StockInfo,
+  sizes: string[],
+}
+
+const sunglassesProduct : Product = {
+  productId: 102,
+  name: "Retro Celebrity Square Sunglasses",
+  price: 192.00,
+  description: "High-quality vinyl with air channel adhesive for easy bubble-free install & mess-free removal. Pressure sensitive.",
+  rating: 4.5,
+  reviews: 150,
+  points: 364,
+  stockInfo: {
+    '#000000': {
+      stock: { XS: 50, S: 0, M: 80, L: 20, XL: 0 },
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTf860vdu5axXoBTGTnfjYhBgDMelbPTdE-qQ&s",
+    },
+    '#007aff': {
+      stock: { XS: 40, S: 50, M: 60, L: 0, XL: 30 },
+      image: "https://5.imimg.com/data5/OL/NN/NO/SELLER-22912755/wayfarer-sunglass-500x500.jpg",
+    },
+    '#134712': {
+      stock: { XS: 0, S: 20, M: 50, L: 0, XL: 10 },
+      image: "https://classymencollection.com/cdn/shop/products/Basic-Standard-Gasoline-Mirror-Lens-Sunglasses-For-Men.jpg?v=1583864874",
+    },
+  },
+  sizes: ["XS", "S", "M", "L", "XL"],
+};
+
+
+const ProductPage = () => {
+  const [selectedColor, setSelectedColor] = useState('#000000');
+  const [selectedSize, setSelectedSize] = useState('M');
+  const [quantity, setQuantity] = useState(1);
+
+  const stock = sunglassesProduct.stockInfo[selectedColor].stock[selectedSize];
+  const isInStock = stock > 0;
+  const selectedImage = sunglassesProduct.stockInfo[selectedColor].image;
+
+  const handleColorChange = (color : string) => {
+    setSelectedColor(color);
+    setSelectedSize('XS'); 
   };
 
-  const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
-  const [selectedSize, setSelectedSize] = useState(selectedVariant.sizes[0]);
-  const [selectedImage, setSelectedImage] = useState(selectedVariant.images[0]); 
-
-  const handleColorChange = (color) => {
-    const newVariant = product.variants.find(variant => variant.color === color);
-    setSelectedVariant(newVariant);
-    setSelectedSize(newVariant.sizes[0]);
-    setSelectedImage(newVariant.images[0]);
-  };
-
-  const handleSizeChange = (size) => {
-    const newSize = selectedVariant.sizes.find(s => s.size === size);
-    setSelectedSize(newSize);
-  };
-
-  const handleImageChange = (image) => {
-    setSelectedImage(image);
+  const handleQuantityChange = (increment : boolean) => {
+    if (increment && quantity < stock) {
+      setQuantity((prev) => prev + 1);
+    } else if (!increment && quantity > 1) {
+      setQuantity((prev) => prev - 1);
+    }
   };
 
   return (
-    <div className="grid grid-cols-2 gap-6">
-      {/* Left Side: Images */}
-      <div className="col-span-1">
-        <img src={selectedImage} alt={product.name} className="w-full object-cover rounded-xl" />
-        <div className="flex mt-4 space-x-2">
-          {selectedVariant.images.map((image, index) => (
+    <div className="container mx-auto grid grid-cols-2 gap-10 p-8">
+      {/* Left: Product Image & Thumbnails */}
+      <div>
+        <div className="relative">
+          <img
+            src={selectedImage}
+            alt="Selected Sunglasses"
+            className="w-full h-[350px] rounded-lg object-cover"
+          />
+          {/* Camera and 360 icons */}
+          <div className="absolute top-4 right-4 space-x-2">
+            <button className="bg-white p-2 rounded-full">
+              <FiCamera size={24} />
+            </button>
+            <button className="bg-white p-2 rounded-full">
+              <FiRotateCw size={24} />
+            </button>
+          </div>
+        </div>
+        <div className="flex mt-4 space-x-4">
+          {Object.keys(sunglassesProduct.stockInfo).map((color, index) => (
             <img
               key={index}
-              src={image}
-              alt={`variant-${index}`}
-              className="w-20 h-20 object-cover rounded-md cursor-pointer"
-              onClick={() => handleImageChange(image)} 
+              src={sunglassesProduct.stockInfo[color].image}
+              alt={`sunglass-${index}`}
+              onClick={() => handleColorChange(color)}
+              className={`w-20 h-20 rounded-lg cursor-pointer ${selectedColor === color ? 'border-2 border-blue-500' : ''}`}
             />
           ))}
         </div>
       </div>
 
-      {/* Right Side: Product Details */}
-      <div className="col-span-1">
-        <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-        <p className="text-xl mb-2">Price: ${selectedSize.price}</p>
-        <div className="mb-4">
-          <p className="text-lg font-semibold">Color:</p>
-          <div className="flex space-x-4 mt-2">
-            {product.variants.map((variant, index) => (
+      {/* Right: Product Details */}
+      <div>
+        <h1 className="text-3xl font-bold">{sunglassesProduct.name}</h1>
+        <p className="text-xl mt-2">৳{sunglassesProduct.price.toFixed(2)}</p>
+        <p className={isInStock ? 'text-green-600 mt-1' : 'text-red-600 mt-1'}>
+          {isInStock ? 'In Stock' : 'Out of Stock'}
+        </p>
+        <div className="mt-3 flex items-center space-x-2">
+          <span>⭐{sunglassesProduct.rating} ({sunglassesProduct.reviews} Reviews)</span>
+        </div>
+
+        {/* Purchase Points */}
+        <div className="mt-4 flex items-center space-x-2">
+          <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg">
+            Purchase this item and get {sunglassesProduct.points} Points
+          </button>
+        </div>
+
+        {/* Colors */}
+        <div className="mt-5">
+          <p className="text-lg font-semibold">Colours:</p>
+          <div className="flex space-x-3 mt-2">
+            {Object.keys(sunglassesProduct.stockInfo).map((color, index) => (
               <button
                 key={index}
-                className={`w-8 h-8 rounded-full border-2 border-['gray'] ${selectedVariant.color === variant.color ? 'border-2 border-black' : ''}`}
-                style={{ backgroundColor: variant.color.toLowerCase() }}
-                onClick={() => handleColorChange(variant.color)}
+                className={`w-8 h-8 rounded-full border ${selectedColor === color ? 'border-black' : ''}`}
+                style={{ backgroundColor: color }}
+                onClick={() => handleColorChange(color)}
               />
             ))}
           </div>
         </div>
 
-        <div className="mb-4">
+        {/* Sizes */}
+        <div className="mt-5">
           <p className="text-lg font-semibold">Size:</p>
-          <div className="flex space-x-4 mt-2">
-            {selectedVariant.sizes.map((sizeOption, index) => (
+          <div className="flex space-x-3 mt-2">
+            {sunglassesProduct.sizes.map((size) => (
               <button
-                key={index}
-                className={`px-4 py-2 rounded-md border ${selectedSize.size === sizeOption.size ? 'border-black' : ''}`}
-                onClick={() => handleSizeChange(sizeOption.size)}
+                key={size}
+                className={`px-4 py-2 rounded-md border ${selectedSize === size ? 'border-black' : ''}`}
+                onClick={() => setSelectedSize(size)}
               >
-                {sizeOption.size} {sizeOption.stock === 0 && '(Out of Stock)'}
+                {size}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="mt-4">
-          <p className="text-md text-gray-600">SKU: {selectedSize.sku}</p>
-          <p className="text-md text-gray-600">Stock: {selectedSize.stock}</p>
+        {/* Quantity and Buy Now or Out of Stock */}
+        <div className="mt-5 flex items-center space-x-4">
+          {isInStock ? (
+            <>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleQuantityChange(false)}
+                  className="bg-black text-white px-3 py-2 rounded-lg"
+                >
+                  -
+                </button>
+                <span>{quantity}</span>
+                <button
+                  onClick={() => handleQuantityChange(true)}
+                  className="bg-black text-white px-3 py-2 rounded-lg"
+                >
+                  +
+                </button>
+              </div>
+              <button className="bg-black hover:bg-gray-700 text-white w-full px-6 py-3 rounded-lg">
+                Add to Cart
+              </button>
+            </>
+          ) : (
+            <button className="text-gray-300 py-2 rounded-md bg-gray-500 w-full cursor-not-allowed text-lg">Out of Stock 🙁</button>
+          )}
         </div>
-        <div>
-            {/* <button className={`bg-black text-white px-3 py-2 rounded-md w-full mt-4 ${selectedSize.stock !== 0 ? 'hover:bg-[gray]' : ' '}`} disabled={selectedSize.stock === 0}>
-                {selectedSize.stock ===0 ? 'Out of Stock 🙁' : 'Add to Cart 🛒'}
-            </button> */}
 
-            <button
-            className={`px-3 py-2 rounded-md w-full mt-4 
-            ${selectedSize.stock !== 0 
-                ? 'bg-black text-white hover:bg-gray-600'
-                : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
-            disabled={selectedSize.stock === 0}
-            >
-            {selectedSize.stock === 0 ? 'Out of Stock 🙁' : 'Add to Cart 🛒'}
-            </button>
+        {/* Augmented Feature */}
+        <div className="mt-5 flex items-center space-x-2 border-t pt-4">
+          <button className="bg-white text-black px-4 py-2 border rounded-lg">
+            Try Augmented Feature
+          </button>
+          <p className="text-sm text-gray-600">See if this glass fit or not</p>
+        </div>
 
+        {/* Customize Feature */}
+        <div className="mt-4 flex items-center space-x-2 border-t pt-4">
+          <button className="bg-white text-black px-4 py-2 border rounded-lg">
+            Customize your Item
+          </button>
+          <p className="text-sm text-gray-600">Customize frame and other stuff</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default SingleProduct;
+export default ProductPage;
