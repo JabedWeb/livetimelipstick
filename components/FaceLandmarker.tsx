@@ -1,20 +1,21 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { FaceLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
+import { useLipstickContext } from "@/context/ColorContext";
 
-export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
+export default function FaceLandmarkerComponent() {
+  const { selectedShade, setSelectedShade, shades, isWebcamActive, setIsWebcamActive } = useLipstickContext();
+
+  console.log("Selected Shade:", selectedShade);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
-  const animationFrameId = useRef<number | null>(null); // To manage animation frame
-  const lipColorRef = useRef(realshade); // Default lipstick color
+  const animationFrameId = useRef<number | null>(null);
+
+  const lipColorRef = useRef("selectedShade"); // Default lipstick color
+  lipColorRef.current = selectedShade.hex;
 
   // Load FaceLandmarker model once on mount
-  useEffect(() => {
-    lipColorRef.current = realshade;
-    console.log("Updated lipColorRef with realshade:", lipColorRef.current);
-  }, [realshade]);
-
   useEffect(() => {
     async function loadModel() {
       const filesetResolver = await FilesetResolver.forVisionTasks(
@@ -34,7 +35,6 @@ export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
     }
     loadModel();
 
-    // Cleanup on unmount
     return () => {
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
@@ -57,7 +57,6 @@ export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
 
     if (!ctx) return;
 
-    // Set canvas size based on video size to maintain proper scaling
     const videoWidth = video.videoWidth;
     const videoHeight = video.videoHeight;
     canvas.width = videoWidth;
@@ -76,16 +75,16 @@ export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
             61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 61,
             185, 40, 39, 37, 0, 267, 269, 270, 409, 291,
           ].map((index) => ({
-            x: landmarks[index].x * videoWidth, // Scaling by video width
-            y: landmarks[index].y * videoHeight, // Scaling by video height
+            x: landmarks[index].x * videoWidth,
+            y: landmarks[index].y * videoHeight,
           }));
 
           const innerLipPoints = [
             78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 78,
             191, 80, 81, 82, 13, 312, 311, 310, 415, 308,
           ].map((index) => ({
-            x: landmarks[index].x * videoWidth, // Scaling by video width
-            y: landmarks[index].y * videoHeight, // Scaling by video height
+            x: landmarks[index].x * videoWidth,
+            y: landmarks[index].y * videoHeight,
           }));
 
           ctx.beginPath();
@@ -97,10 +96,9 @@ export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
           innerLipPoints.forEach((point) => ctx.lineTo(point.x, point.y));
           ctx.closePath();
 
-          ctx.fillStyle = lipColorRef.current; // Use prop directly instead of ref
+          ctx.fillStyle = lipColorRef.current;
           ctx.fill("evenodd");
 
-          // Draw lip landmarks for debugging
           drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
             color: "black",
             lineWidth: 1,
@@ -130,7 +128,6 @@ export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
       };
       enableWebcam();
     } else {
-      // Cleanup when webcam is turned off
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
@@ -142,43 +139,122 @@ export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
     }
   }, [isWebcamActive]);
 
+  // Handle closing the webcam popup
+  const handleCloseWebcam = () => {
+    if (animationFrameId.current) {
+      cancelAnimationFrame(animationFrameId.current);
+    }
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsWebcamActive(false);
+  };
+
+  // Handle shade selection
+  const handleShadeChange = (shade: typeof selectedShade) => {
+    setSelectedShade(shade);
+  };
+
   return (
-    <div style={{ 
-      position: "fixed", 
-      top: "50%", 
-      left: "50%", 
-      transform: "translate(-50%, -50%)", 
-      zIndex: isWebcamActive ? 10 : -1 
-    }}>
+    <div
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: isWebcamActive ? 10 : -1,
+      }}
+    >
       <div
         style={{
           position: "relative",
           display: isWebcamActive ? "block" : "none",
-          width: "640px",  
-          height: "100vh", 
-          margin: "0 auto", 
+          width: "640px",
+          height: "100vh",
+          margin: "0 auto",
+          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          borderRadius: "10px",
+          padding: "20px",
         }}
       >
-          <video
+        <video
           ref={videoRef}
           autoPlay
-          playsInline 
-          style={{ position: "absolute", top: 50, left: 0 }}
+          playsInline
+          style={{ position: "absolute", top: 50, left: 20, width: "600px", height: "auto" }}
         ></video>
         <canvas
           ref={canvasRef}
-          style={{ position: "absolute", top: 50, left: 0 }}
+          style={{ position: "absolute", top: 50, left: 20, width: "600px", height: "auto" }}
         ></canvas>
+
+        {/* Close Button */}
+        <button
+          onClick={handleCloseWebcam}
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            backgroundColor: "#e63946",
+            color: "white",
+            padding: "5px 10px",
+            borderRadius: "5px",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Close
+        </button>
+
+        {/* Shade Selector */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 20,
+            left: 20,
+            right: 20,
+            display: "flex",
+            justifyContent: "center",
+            gap: "10px",
+          }}
+        >
+          {shades.map((shade, index) => (
+            <button
+              key={index}
+              onClick={() => handleShadeChange(shade)}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                backgroundColor: shade.hex,
+                border: selectedShade.hex === shade.hex ? "3px solid #e63946" : "1px solid #ccc",
+                cursor: "pointer",
+                position: "relative",
+              }}
+            >
+              {selectedShade.hex === shade.hex && (
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: "-25px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    fontSize: "12px",
+                    color: "#333",
+                  }}
+                >
+                  {shade.name}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
 
 
 
