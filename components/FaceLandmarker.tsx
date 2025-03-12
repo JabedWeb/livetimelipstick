@@ -2,11 +2,18 @@
 import { useEffect, useRef } from "react";
 import { FaceLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 
-export default function FaceLandmarkerComponent() {
+export default function FaceLandmarkerComponent({ realshade, isWebcamActive }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
-  const lipColorRef = useRef("#FF3030"); // Default lipstick color
+  const animationFrameId = useRef<number | null>(null); // To manage animation frame
+  const lipColorRef = useRef("realshade"); // Default lipstick color
+
+  // Load FaceLandmarker model once on mount
+useEffect(() => {
+    lipColorRef.current = realshade;
+    console.log("Updated lipColorRef with realshade:", lipColorRef.current);
+  }, [realshade]);
 
   useEffect(() => {
     async function loadModel() {
@@ -26,8 +33,21 @@ export default function FaceLandmarkerComponent() {
       faceLandmarkerRef.current = landmarker;
     }
     loadModel();
+
+    // Cleanup on unmount
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    };
   }, []);
 
+  // Process video and draw lip color
   const processVideo = () => {
     if (!faceLandmarkerRef.current || !videoRef.current || !canvasRef.current) return;
 
@@ -35,87 +55,102 @@ export default function FaceLandmarkerComponent() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
+    if (!ctx) return;
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
     const drawFrame = () => {
-      if (!faceLandmarkerRef.current) return;
+      if (!faceLandmarkerRef.current || !videoRef.current) return;
 
       const results = faceLandmarkerRef.current.detectForVideo(video, performance.now());
-      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (results.faceLandmarks) {
-        const drawingUtils = new DrawingUtils(ctx!);
+        const drawingUtils = new DrawingUtils(ctx);
         for (const landmarks of results.faceLandmarks) {
-          // Get lip landmarks
           const outerLipPoints = [
-            61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 61, // Outer lip
-            185, 40, 39, 37, 0, 267, 269, 270, 409, 291,  // Extra top-lip details
-          ].map(index => ({
+            61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291, 61,
+            185, 40, 39, 37, 0, 267, 269, 270, 409, 291,
+          ].map((index) => ({
             x: landmarks[index].x * canvas.width,
             y: landmarks[index].y * canvas.height,
           }));
 
           const innerLipPoints = [
-            78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 78,   // Inner lip
-            191, 80, 81, 82, 13, 312, 311, 310, 415, 308 // Extra lower-lip details
-          ].map(index => ({
+            78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 78,
+            191, 80, 81, 82, 13, 312, 311, 310, 415, 308,
+          ].map((index) => ({
             x: landmarks[index].x * canvas.width,
             y: landmarks[index].y * canvas.height,
           }));
 
-          // Start drawing lips
-          ctx!.beginPath();
+          ctx.beginPath();
+          ctx.moveTo(outerLipPoints[0].x, outerLipPoints[0].y);
+          outerLipPoints.forEach((point) => ctx.lineTo(point.x, point.y));
+          ctx.closePath();
 
-          // Draw outer lip shape
-          ctx!.moveTo(outerLipPoints[0].x, outerLipPoints[0].y);
-          outerLipPoints.forEach((point) => ctx!.lineTo(point.x, point.y));
-          ctx!.closePath();
+          ctx.moveTo(innerLipPoints[0].x, innerLipPoints[0].y);
+          innerLipPoints.forEach((point) => ctx.lineTo(point.x, point.y));
+          ctx.closePath();
 
-          // Create a separate path for the inner lips (mouth opening)
-          ctx!.moveTo(innerLipPoints[0].x, innerLipPoints[0].y);
-          innerLipPoints.forEach((point) => ctx!.lineTo(point.x, point.y));
-          ctx!.closePath();
+          ctx.fillStyle = lipColorRef.current; // Use prop directly instead of ref
+          ctx.fill("evenodd");
 
-          // Use "evenodd" fill rule to remove the inside of the mouth
-          ctx!.fillStyle = lipColorRef.current;
-          ctx!.fill("evenodd");
-
-          // Draw Lip Outline for Better Look
-          drawingUtils.drawConnectors(
-            landmarks,
-            FaceLandmarker.FACE_LANDMARKS_LIPS,
-            { color: "black", lineWidth: 1 } // Thin outline for natural look
-          );
+          drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {
+            color: "black",
+            lineWidth: 1,
+          });
         }
       }
 
-      requestAnimationFrame(drawFrame);
+      animationFrameId.current = requestAnimationFrame(drawFrame);
     };
 
     drawFrame();
   };
 
-  const enableWebcam = async () => {
-    if (!faceLandmarkerRef.current || !videoRef.current || !canvasRef.current) return;
+  // Handle webcam start/stop
+  useEffect(() => {
+    if (isWebcamActive) {
+      const enableWebcam = async () => {
+        if (!faceLandmarkerRef.current || !videoRef.current || !canvasRef.current) return;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoRef.current.srcObject = stream;
-    videoRef.current.onloadeddata = () => processVideo();
-  };
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadeddata = () => processVideo();
+        } catch (error) {
+          console.error("Error accessing webcam:", error);
+        }
+      };
+      enableWebcam();
+    } else {
+      // Cleanup when webcam is turned off
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
+  }, [isWebcamActive]);
 
   return (
-    <div>
-      <h1>Next.js Face Landmarker</h1>
-      <select onChange={(e) => (lipColorRef.current = e.target.value)}>
-        <option value="#FF3030">Red</option>
-        <option value="#800080">Purple</option>
-        <option value="#8B0000">Deep Red</option>
-      </select>
-      <button onClick={enableWebcam}>Enable Webcam</button>
-      <div style={{ position: "relative" }}>
-        <video ref={videoRef} autoPlay playsInline style={{ position: "absolute" }}></video>
-        <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0 }}></canvas>
+    <div style={{ position: "relative", zIndex: isWebcamActive ? 10 : -1 }}>
+      <div style={{ position: "relative", display: isWebcamActive ? "block" : "none" }}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          style={{ position: "absolute", top: 50, left: 0 }}
+        ></video>
+        <canvas
+          ref={canvasRef}
+          style={{ position: "absolute", top: 50, left: 0 }}
+        ></canvas>
       </div>
     </div>
   );
