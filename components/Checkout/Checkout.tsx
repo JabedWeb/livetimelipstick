@@ -2,7 +2,7 @@
 
 export default function Checkout() {
   return (
-    <div className="p-6">
+    <div className="max-w-7xl mx-auto p-6">
       {/* Navigation */}
       <div className="text-center my-4">
         <span className="text-sm text-gray-500">Shopping Cart</span>
@@ -49,7 +49,6 @@ export default function Checkout() {
             />
             <button className="ml-4 rounded-md bg-black text-white p-2">Apply Gift Card</button>
           </div>
-
 
 
 

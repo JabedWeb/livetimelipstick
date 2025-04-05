@@ -1,6 +1,7 @@
 'use client';
 
 
+import Link from 'next/link';
 // pages/cart.js
 import { useState } from 'react';
 import { BiInfoCircle } from 'react-icons/bi';
@@ -13,7 +14,7 @@ export default function Cart() {
   };
 
   return (
-    <div className="p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="text-center my-4">
         <span className="text-sm text-gray-500">Shopping Cart</span>
         <span className="mx-2">→</span>
@@ -89,7 +90,9 @@ export default function Cart() {
             <p>Total</p>
             <p>৳{(14.99*quantity).toFixed(2)}</p>
           </div>
-          <button className="w-full bg-black rounded-md text-white py-2 mt-4">Proceed to Checkout</button>
+          <Link href="/checkout" className="block text-center bg-black text-white py-2 mt-4 rounded-md">
+            Proceed to Checkout 
+          </Link>
         </div>
       </div>
     </div>

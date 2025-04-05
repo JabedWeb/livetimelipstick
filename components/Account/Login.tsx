@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 const Login = () => {
   return (
-    <div className='md:flex  items-center'>
+    <div className='max-w-7xl mx-auto md:flex  items-center'>
         <div className='md:w-1/2'>
           <img className='w-full' src="/login.png" alt="login page" />
         </div>
@@ -25,7 +25,7 @@ const Login = () => {
                 <label className='ml-2'>Remember me</label>
               </div>
               <div>
-                <a href="#">Forget password?</a>
+                <a href="/forget-password">Forget password?</a>
               </div>
               
               
@@ -35,7 +35,7 @@ const Login = () => {
           </form>
 
           <div className='mt-2'>
-            <p>Don&apos;t have an account? <a className='font-semibold' href="#">Sign up</a></p>
+            <p>Don&apos;t have an account? <a className='font-semibold' href="/register">Sign up</a></p>
           </ div>
         </div>
     </div>

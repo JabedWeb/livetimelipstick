@@ -2,7 +2,7 @@ import React from 'react'
 
 const Register = () => {
   return (
- <div className='md:flex  items-center'>
+ <div className='max-w-7xl mx-auto md:flex  items-center'>
         <div className='md:w-1/2'>
           <img className='w-full' src="/register.png" alt="login page" />
         </div>
@@ -37,7 +37,7 @@ const Register = () => {
           </form>
 
           <div className='mt-2'>
-            <p>Already Register ?  <a className='font-semibold' href="#">Login</a></p>
+            <p>Already Register ?  <a className='font-semibold' href="/login">Login</a></p>
           </ div>
         </div>
     </div>

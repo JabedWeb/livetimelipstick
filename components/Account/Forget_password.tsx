@@ -2,7 +2,7 @@ import React from 'react'
 
 const Forget_password = () => {
   return (
-   <div className='md:flex  items-center'>
+   <div className='max-w-7xl mx-auto md:flex  items-center'>
         <div className='md:w-1/2'>
           <img className='w-full' src="/login.png" alt="login page" />
         </div>
