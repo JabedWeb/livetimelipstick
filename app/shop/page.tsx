@@ -1,8 +1,12 @@
+
+import FaceLandmarkerComponent from '@/components/DontTouch/DefaultFaceLandmark'
 import React from 'react'
 
 const page = () => {
   return (
-    <div>page</div>
+    <div>
+      <FaceLandmarkerComponent />
+    </div>
   )
 }
 
