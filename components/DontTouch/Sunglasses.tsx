@@ -69,8 +69,9 @@ export default function Sunglasses() {
           const angle = Math.atan2(dy, dx);
           const distance = Math.hypot(dx, dy);
 
-          const glassesWidth = distance * 2.5; // adjust scale
-          const glassesHeight = glassesWidth * 0.5;
+          // sunglasses size based on distance between eyes
+          const glassesWidth = distance * 2.2; 
+          const glassesHeight = glassesWidth * 1;
 
           ctx!.save();
           ctx!.translate(centerX, centerY);
