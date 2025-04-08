@@ -98,8 +98,10 @@ const SingleSunglass = () => {
             <div className="flex space-x-3 mt-2">
               {sunglasses.map((glass, index) => (
                 <button
+                style={{ backgroundColor: glass.color }}
                   key={index}
-                  className={`w-8 h-8 bg-gray-200 rounded-full border ${
+                  className={`w-8 h-8 rounded-full border ${
+
                     selectedGlass.name === glass.name ? "border-[#e63946]" : ""
                   }`}
                   onClick={() => handleGlassChange(glass)}

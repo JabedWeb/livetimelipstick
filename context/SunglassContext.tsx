@@ -26,16 +26,10 @@ const defaultGlasses: SunglassInfo[] = [
     stock: 10,
   },
   {
-    name: "Round Retro",
-    image: "https://i.imgur.com/z4d4kWk.png",
-    color : "#FF5733",
+    name: "Green Aviator",
+    image: "greensunglass.png",
+    color : "#008000",
     stock: 5,
-  },
-  {
-    name: "Sporty Frame",
-    image: "https://i.imgur.com/Yz9H7Oz.png",
-    color : "#33FF57",
-    stock: 7,
   },
 ];
 
