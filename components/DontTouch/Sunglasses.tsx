@@ -1,12 +1,23 @@
 "use client";
+
 import { useEffect, useRef } from "react";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import Image from "next/image";
+import { useSunglassContext } from "@/context/SunglassContext";
 
 export default function Sunglasses() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
   const sunglassesImageRef = useRef<HTMLImageElement | null>(null);
+
+  const {
+    glasses,
+    selectedGlass,
+    setSelectedGlass,
+    isWebcamActive,
+    setIsWebcamActive,
+  } = useSunglassContext();
 
   useEffect(() => {
     async function loadModel() {
@@ -24,13 +35,25 @@ export default function Sunglasses() {
       });
       faceLandmarkerRef.current = landmarker;
 
-      // Load sunglasses image
-      const img = new Image();
-      img.src = "/sunglasses.png"; // Put your image in public folder
-      img.onload = () => (sunglassesImageRef.current = img);
+      const img = document.createElement("img");
+img.src = selectedGlass.image;
+img.onload = () => {
+  sunglassesImageRef.current = img;
+};
+
     }
+
     loadModel();
   }, []);
+
+  useEffect(() => {
+    const img = document.createElement("img");
+img.src = selectedGlass.image;
+img.onload = () => {
+  sunglassesImageRef.current = img;
+};
+
+  }, [selectedGlass]);
 
   const processVideo = () => {
     if (!faceLandmarkerRef.current || !videoRef.current || !canvasRef.current) return;
@@ -50,16 +73,13 @@ export default function Sunglasses() {
 
       if (results.faceLandmarks) {
         for (const landmarks of results.faceLandmarks) {
-          const leftEye = landmarks[33];  // left eye outer corner
-          const rightEye = landmarks[263]; // right eye outer corner
-          const nose = landmarks[168]; // nose bridge
+          const leftEye = landmarks[33];
+          const rightEye = landmarks[263];
 
           const eyeLeftX = leftEye.x * canvas.width;
           const eyeLeftY = leftEye.y * canvas.height;
           const eyeRightX = rightEye.x * canvas.width;
           const eyeRightY = rightEye.y * canvas.height;
-          const noseX = nose.x * canvas.width;
-          const noseY = nose.y * canvas.height;
 
           const centerX = (eyeLeftX + eyeRightX) / 2;
           const centerY = (eyeLeftY + eyeRightY) / 2;
@@ -69,8 +89,7 @@ export default function Sunglasses() {
           const angle = Math.atan2(dy, dx);
           const distance = Math.hypot(dx, dy);
 
-          // sunglasses size based on distance between eyes
-          const glassesWidth = distance * 2.2; 
+          const glassesWidth = distance * 2.2;
           const glassesHeight = glassesWidth * 1;
 
           ctx!.save();
@@ -99,16 +118,74 @@ export default function Sunglasses() {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoRef.current.srcObject = stream;
     videoRef.current.onloadeddata = () => processVideo();
+    setIsWebcamActive(true);
+  };
+
+  const disableWebcam = () => {
+    if (videoRef.current?.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsWebcamActive(false);
   };
 
   return (
-    <div>
-      <h1>Virtual Sunglasses (Live)</h1>
-      <button onClick={enableWebcam}>Enable Webcam</button>
-      <div style={{ position: "relative" }}>
-        <video ref={videoRef} autoPlay playsInline style={{ position: "absolute" }}></video>
-        <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0 }}></canvas>
-      </div>
+    <div className="w-full h-full flex flex-col items-center gap-6">
+      <h2 className="text-2xl font-bold text-center">Virtual Sunglasses Try-On</h2>
+
+      {!isWebcamActive && (
+        <button
+          onClick={enableWebcam}
+          className="px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition"
+        >
+          Enable Webcam
+        </button>
+      )}
+
+      {isWebcamActive && (
+        <>
+          <div className="relative w-full max-w-2xl aspect-video border rounded-xl overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="absolute w-full h-full object-cover"
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute top-0 left-0 w-full h-full"
+            />
+          </div>
+
+          <div className="flex items-center justify-center gap-4">
+            {glasses.map((glass, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedGlass(glass)}
+                className={`border-2 p-2 rounded-xl ${
+                  selectedGlass.name === glass.name ? "border-black" : "border-transparent"
+                } hover:scale-105 transition`}
+              >
+                <Image
+                  src={glass.image}
+                  alt={glass.name}
+                  width={60}
+                  height={30}
+                  className="rounded"
+                />
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={disableWebcam}
+            className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
+          >
+            Close Webcam
+          </button>
+        </>
+      )}
     </div>
   );
 }

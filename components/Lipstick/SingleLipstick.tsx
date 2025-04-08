@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FiCamera, FiRotateCw } from "react-icons/fi";
-import FaceLandmarkerComponent from "../FaceLandmarker";
+import FaceLandmarkerComponent from "./FaceLandmarker";
 import { useLipstickContext } from "@/context/ColorContext";
 
 interface LipstickProduct {
