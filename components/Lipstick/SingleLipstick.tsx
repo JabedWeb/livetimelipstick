@@ -1,39 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiCamera, FiRotateCw } from "react-icons/fi";
-import FaceLandmarkerComponent from "./FaceLandmarker";
 import { useLipstickContext } from "@/context/ColorContext";
-
-interface LipstickProduct {
-  productId: number;
-  name: string;
-  price: number;
-  description: string;
-  rating: number;
-  reviews: number;
-  points: number;
-}
-
-const lipstickProduct: LipstickProduct = {
-  productId: 205,
-  name: "Velvet Matte Liquid Lipstick",
-  price: 299.99,
-  description:
-    "Long-lasting, highly pigmented velvet matte finish. Hydrating and non-drying formula for an all-day comfortable wear.",
-  rating: 4.8,
-  reviews: 234,
-  points: 500,
-};
+import FaceLandmarkerComponent from "./FaceLandmarker";
 
 const LipstickProductPage = () => {
-  const { selectedShade, setSelectedShade, shades, isWebcamActive, setIsWebcamActive } = useLipstickContext();
+  const {
+    selectedProduct,
+    setSelectedShade,
+    selectedShade,
+    setIsWebcamActive,
+    isWebcamActive,
+  } = useLipstickContext();
+
   const [quantity, setQuantity] = useState<number>(1);
 
   const isInStock = selectedShade.stock > 0;
 
+  // Set initial shade if product changes
+  useEffect(() => {
+    if (selectedProduct && selectedProduct.shades.length > 0) {
+      setSelectedShade(selectedProduct.shades[0]);
+    }
+  }, [selectedProduct, setSelectedShade]);
+
   const handleShadeChange = (shade: typeof selectedShade) => {
     setSelectedShade(shade);
+    setQuantity(1);
   };
 
   const handleQuantityChange = (increment: boolean) => {
@@ -51,8 +45,9 @@ const LipstickProductPage = () => {
   return (
     <>
       <FaceLandmarkerComponent />
+
       <div className="container mx-auto grid md:grid-cols-2 gap-10 p-8">
-        {/* Left: Product Image & Thumbnails */}
+        {/* Left: Product Image & Shades */}
         <div>
           <div className="relative">
             <img
@@ -69,8 +64,10 @@ const LipstickProductPage = () => {
               </button>
             </div>
           </div>
+
+          {/* Image thumbnails */}
           <div className="flex mx-auto justify-center mt-4 space-x-4">
-            {shades.map((shade, index) => (
+            {selectedProduct.shades.map((shade, index) => (
               <img
                 key={index}
                 src={shade.image}
@@ -86,27 +83,29 @@ const LipstickProductPage = () => {
 
         {/* Right: Product Details */}
         <div>
-          <h1 className="text-3xl font-bold text-[#e63946]">{lipstickProduct.name}</h1>
-          <p className="text-xl mt-2 text-[#333]">৳{lipstickProduct.price.toFixed(2)}</p>
+          <h1 className="text-3xl font-bold text-[#e63946]">{selectedProduct.name}</h1>
+          <p className="text-xl mt-2 text-[#333]">৳{selectedProduct.price.toFixed(2)}</p>
           <p className={isInStock ? "text-[#2a9d8f] mt-1" : "text-[#e63946] mt-1"}>
             {isInStock ? "In Stock" : "Out of Stock"}
           </p>
+
           <div className="mt-3 flex items-center space-x-2 text-[#f4a261]">
             <span>
-              ⭐{lipstickProduct.rating} ({lipstickProduct.reviews} Reviews)
+              ⭐{selectedProduct.rating} ({selectedProduct.reviews} Reviews)
             </span>
           </div>
 
           <div className="mt-4 flex items-center space-x-2">
             <button className="flex items-center bg-[#2a9d8f] text-white px-4 py-2 rounded-lg">
-              Purchase this item and get {lipstickProduct.points} Points
+              Purchase this item and get {selectedProduct.points} Points
             </button>
           </div>
 
+          {/* Shade Selector */}
           <div className="mt-5">
             <p className="text-lg font-semibold">Shades:</p>
-            <div className="flex space-x-3 mt-2 ">
-              {shades.map((shade, index) => (
+            <div className="flex space-x-3 mt-2">
+              {selectedProduct.shades.map((shade, index) => (
                 <button
                   key={index}
                   className={`w-8 h-8 relative rounded-full border ${
@@ -115,14 +114,17 @@ const LipstickProductPage = () => {
                   style={{ backgroundColor: shade.hex }}
                   onClick={() => handleShadeChange(shade)}
                 >
-                  <span className="absolute top-[50px] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm text-gray-700">
-                    {selectedShade.name === shade.name && selectedShade.name}
-                  </span>
+                  {selectedShade.name === shade.name && (
+                    <span className="absolute top-[50px] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm text-gray-700 whitespace-nowrap">
+                      {shade.name}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Quantity Selector */}
           <div className="mt-10">
             <p className="text-lg font-semibold">Quantity:</p>
             <div className="flex space-x-3 mt-2">
@@ -142,6 +144,7 @@ const LipstickProductPage = () => {
                 +
               </button>
             </div>
+
             <button
               className="mt-5 px-8 py-2 bg-[#e63946] text-white rounded-md"
               disabled={!isInStock}
