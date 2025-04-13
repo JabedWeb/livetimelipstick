@@ -9,7 +9,8 @@ export default function Navbar() {
 const pathname = usePathname();
   const links = [
     { name: 'Home', path: '/' },
-    { name: 'Shop', path: '/lipstickshop' },
+    { name: 'Lipstick', path: '/lipstickshop' },
+    { name: 'Sunglass', path: '/sunglass' },
     { name: 'About', path: '/about' },
     { name: 'Sign Up', path: '/login' },
   ];

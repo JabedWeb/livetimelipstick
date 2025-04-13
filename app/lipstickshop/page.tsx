@@ -1,4 +1,5 @@
-import Shop_grid from '@/components/Shop/Shop_grid'
+
+import Shop_grid from '@/components/Grid'
 import SingleLipstic from '@/components/Lipstick/SingleLipstick'
 import SingleProduct from '@/components/Shop/SingleProduct'
 import { LipstickProvider } from '@/context/ColorContext'
@@ -7,10 +8,9 @@ import React from 'react'
 const page = () => {
   return (
     <div>
-        {/* <Shop_grid /> */}
-        {/* <SingleProduct /> */}
         <LipstickProvider>
-           <SingleLipstic />
+          <Shop_grid />
+           {/* <SingleLipstic /> */}
         </LipstickProvider>
        
     </div>

@@ -3,15 +3,14 @@ import { useEffect, useRef } from "react";
 import {
   FaceLandmarker,
   FilesetResolver,
-  DrawingUtils,
 } from "@mediapipe/tasks-vision";
 import { useSunglassContext } from "@/context/SunglassContext";
 
 export default function SunglassesLandmarkerComponent() {
   const {
-    sunglasses,
-    selectedGlass,
-    setSelectedGlass,
+    selectedGlassProduct,
+    selectedVariant,
+    setSelectedVariant,
     isWebcamActive,
     setIsWebcamActive,
   } = useSunglassContext();
@@ -22,14 +21,13 @@ export default function SunglassesLandmarkerComponent() {
   const animationFrameId = useRef<number | null>(null);
   const sunglassesImageRef = useRef<HTMLImageElement | null>(null);
 
-  // Load selected sunglasses image when changed
   useEffect(() => {
     const img = new Image();
-    img.src = selectedGlass.image;
+    img.src = selectedVariant.image;
     img.onload = () => {
       sunglassesImageRef.current = img;
     };
-  }, [selectedGlass.image]);
+  }, [selectedVariant]);
 
   useEffect(() => {
     async function loadModel() {
@@ -81,60 +79,56 @@ export default function SunglassesLandmarkerComponent() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-// ...keep the rest of the component as before
+    const drawFrame = () => {
+      const results = faceLandmarkerRef.current!.detectForVideo(
+        video,
+        performance.now()
+      );
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-const drawFrame = () => {
-  const results = faceLandmarkerRef.current!.detectForVideo(
-    video,
-    performance.now()
-  );
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (results.faceLandmarks) {
+for (const landmarks of results.faceLandmarks) {
+          const leftEye = landmarks[33];
+          const rightEye = landmarks[263];
+          const nose = landmarks[168];
 
-  if (results.faceLandmarks) {
-    for (const landmarks of results.faceLandmarks) {
-      const leftEye = landmarks[33];
-      const rightEye = landmarks[263];
-      const nose = landmarks[168];
+          const eyeLeftX = leftEye.x * canvas.width;
+          const eyeLeftY = leftEye.y * canvas.height;
+          const eyeRightX = rightEye.x * canvas.width;
+          const eyeRightY = rightEye.y * canvas.height;
 
-      const eyeLeftX = leftEye.x * canvas.width;
-      const eyeLeftY = leftEye.y * canvas.height;
-      const eyeRightX = rightEye.x * canvas.width;
-      const eyeRightY = rightEye.y * canvas.height;
-      const noseX = nose.x * canvas.width;
-      const noseY = nose.y * canvas.height;
+          const centerX = (eyeLeftX + eyeRightX) / 2;
+          const centerY = (eyeLeftY + eyeRightY) / 2;
 
-      const centerX = (eyeLeftX + eyeRightX) / 2;
-      const centerY = (eyeLeftY + eyeRightY) / 2;
+          const dx = eyeRightX - eyeLeftX;
+          const dy = eyeRightY - eyeLeftY;
+          const angle = Math.atan2(dy, dx);
+          const distance = Math.hypot(dx, dy);
 
-      const dx = eyeRightX - eyeLeftX;
-      const dy = eyeRightY - eyeLeftY;
-      const angle = Math.atan2(dy, dx);
-      const distance = Math.hypot(dx, dy);
+          const glassesWidth = distance * 2.2;
+          const glassesHeight = glassesWidth * 1;
 
-      const glassesWidth = distance * 2.2;
-      const glassesHeight = glassesWidth * 1;
-
-      if (sunglassesImageRef.current) {
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle);
-        ctx.drawImage(
-          sunglassesImageRef.current,
-          -glassesWidth / 2,
-          -glassesHeight / 2,
-          glassesWidth,
-          glassesHeight
-        );
-        ctx.restore();
+          if (sunglassesImageRef.current) {
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(angle);
+            ctx.drawImage(
+              sunglassesImageRef.current,
+              -glassesWidth / 2,
+              -glassesHeight / 2,
+              glassesWidth,
+              glassesHeight
+            );
+            ctx.restore();
+          }
+        }
       }
-    }
-  }
 
-  animationFrameId.current = requestAnimationFrame(drawFrame);
-};
-  
-      drawFrame();
-    }
+      animationFrameId.current = requestAnimationFrame(drawFrame);
+    };
+
+    drawFrame();
+  };
 
   useEffect(() => {
     if (isWebcamActive) {
@@ -191,7 +185,7 @@ const drawFrame = () => {
           width: "640px",
           height: "100vh",
           margin: "0 auto",
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          backgroundColor: "#fff",
           borderRadius: "10px",
           padding: "20px",
           boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)",
@@ -209,7 +203,7 @@ const drawFrame = () => {
             height: "auto",
             borderRadius: "10px",
           }}
-        ></video>
+        />
         <canvas
           ref={canvasRef}
           style={{
@@ -220,8 +214,7 @@ const drawFrame = () => {
             height: "auto",
             pointerEvents: "none",
           }}
-        ></canvas>
-
+        />
         <button
           onClick={handleCloseWebcam}
           style={{
@@ -239,7 +232,7 @@ const drawFrame = () => {
           Close
         </button>
 
-        {/* Style Selector */}
+        {/* Variant Selector */}
         <div
           style={{
             position: "absolute",
@@ -248,43 +241,48 @@ const drawFrame = () => {
             right: 20,
             display: "flex",
             justifyContent: "center",
-            gap: "10px",
+            gap: "15px",
+            flexWrap: "wrap",
+            padding: "10px",
+            backgroundColor: "#f7f7f7",
+            borderRadius: "8px",
           }}
         >
-          {sunglasses.map((glass, index) => (
-            <button
+          {selectedGlassProduct.variations.map((variant, index) => (
+            <div
               key={index}
-              onClick={() => setSelectedGlass(glass)}
+              onClick={() => setSelectedVariant(variant)}
               style={{
-                width: "50px",
-                height: "50px",
-                borderRadius: "50%",
-                backgroundImage: `url(${glass.image})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                border:
-                  selectedGlass.name === glass.name
-                    ? "3px solid #e63946"
-                    : "1px solid #ccc",
                 cursor: "pointer",
-                position: "relative",
+                border:
+                  selectedVariant.name === variant.name
+                    ? "2px solid #e63946"
+                    : "1px solid #ccc",
+                borderRadius: "8px",
+                padding: "5px",
+                backgroundColor: "#fff",
+                boxShadow:
+                  selectedVariant.name === variant.name
+                    ? "0 0 10px rgba(230, 57, 70, 0.5)"
+                    : "0 0 5px rgba(0,0,0,0.1)",
+                width: "70px",
+                textAlign: "center",
               }}
             >
-              {selectedGlass.name === glass.name && (
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: "-25px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    fontSize: "12px",
-                    color: "#333",
-                  }}
-                >
-                  {glass.name}
-                </span>
-              )}
-            </button>
+              <img
+                src={variant.image}
+                alt={variant.name}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "6px",
+                  objectFit: "cover",
+                }}
+              />
+              <p style={{ fontSize: "10px", margin: "4px 0 0" }}>
+                {variant.name}
+              </p>
+            </div>
           ))}
         </div>
       </div>

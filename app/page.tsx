@@ -1,5 +1,6 @@
 import ProductGrid from "@/components/Grid";
 import ProductPage from "@/components/ProductPage";
+import { LipstickProvider } from "@/context/ColorContext";
 
 
 export default function Home() {
@@ -7,7 +8,9 @@ export default function Home() {
     <div>
       {/* <FaceLandmarkerComponent /> */}
       {/* <ProductPage /> */}
-      <ProductGrid />
+      <LipstickProvider>
+           <ProductGrid />
+      </LipstickProvider>
     </div>
   );
 }
