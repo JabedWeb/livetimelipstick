@@ -1,31 +1,14 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { FaPlus, FaMinus, FaMapMarkerAlt, FaTruck } from "react-icons/fa";
+import {
+  CartItem,
+  loadCart,
+  saveCart,
+  updateCartItem,
+} from "./CartHandler";
+import CheckoutForm from "./CheckoutForm";
 
-// ---------------------------
-// Type Definitions
-// ---------------------------
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-  image: string;
-  quantity: number;
-}
-
-interface CustomerInfo {
-  name: string;
-  email: string;
-  phone: string;
-  pickup: string;
-  shippingAddress: string;
-}
-
-// ---------------------------
-// Mock Data
-// ---------------------------
-const productsData: Omit<Product, "quantity">[] = [
+const products = [
   {
     id: 1,
     title: "White Thobe",
@@ -36,156 +19,93 @@ const productsData: Omit<Product, "quantity">[] = [
     id: 2,
     title: "Towel",
     price: 2,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzMth7hV4OBcnr3gvoy7i-NSFSDH0FRQvfkQ&s",
-  },
-  {
-    id: 3,
-    title: "Sports Suit",
-    price: 6,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzMth7hV4OBcnr3gvoy7i-NSFSDH0FRQvfkQ&s",
-  },
-  {
-    id: 4,
-    title: "Bed Sheet",
-    price: 4,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzMth7hV4OBcnr3gvoy7i-NSFSDH0FRQvfkQ&s",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzMth7hV4OBcnr3gvoy7i-NSFSDH0FRQvfkQ&s",
   },
 ];
 
-// ---------------------------
-// Component
-// ---------------------------
 export default function LaundryBooking() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [shipping, setShipping] = useState<"regular" | "express">("regular");
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    name: "",
-    email: "",
-    phone: "",
-    pickup: "",
-    shippingAddress: "",
-  });
 
-  const multiplier = shipping === "express" ? 1.5 : 1;
-
-  // Load from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("laundryProducts");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as Product[];
-        setProducts(parsed);
-      } catch (e) {
-        console.error("Invalid JSON in localStorage:", e);
-      }
-    } else {
-      setProducts(productsData.map((p) => ({ ...p, quantity: 0 })));
-    }
+    setCart(loadCart());
   }, []);
 
-  // Save to localStorage
   useEffect(() => {
-    localStorage.setItem("laundryProducts", JSON.stringify(products));
-  }, [products]);
+    saveCart(cart);
+  }, [cart]);
 
-  const updateQuantity = (id: number, amount: number) => {
-    setProducts((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(0, item.quantity + amount) }
-          : item
-      )
-    );
+  const getQuantity = (id: number) => cart.find(item => item.id === id)?.quantity || 0;
+
+  const updateQuantity = (product: typeof products[0], change: number) => {
+    const current = getQuantity(product.id);
+    const newQty = Math.max(0, current + change); 
+    const updated = updateCartItem(cart, product, newQty);
+    setCart(updated);
   };
 
-  const total = products.reduce(
-    (acc, item) => acc + item.price * item.quantity * multiplier,
-    0
-  );
-  const regularTotal = products.reduce(
+  const multiplier = shipping === "express" ? 1.5 : 1;
+  const total = cart.reduce((acc, item) => acc + item.price * item.quantity * multiplier, 0);
+
+    const regularTotal = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  const expressTotal = products.reduce(
+  const expressTotal = cart.reduce(
     (acc, item) => acc + item.price * 1.5 * item.quantity,
     0
   );
   const priceDifference = expressTotal - regularTotal;
 
-  // ---------------------------
-  // JSX
-  // ---------------------------
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        Fawziah Laundry Booking
-      </h1>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-6">Laundry Booking</h1>
 
-      {/* Shipping Type Selector */}
       <div className="flex justify-center gap-4 mb-6">
         <button
           onClick={() => setShipping("regular")}
-          className={`px-4 py-2 rounded-lg ${
-            shipping === "regular" ? "bg-green-200" : "bg-gray-100"
-          }`}
+          className={`px-4 py-2 rounded-lg ${shipping === "regular" ? "bg-green-300" : "bg-gray-200"}`}
         >
           Regular
         </button>
         <button
           onClick={() => setShipping("express")}
-          className={`px-4 py-2 rounded-lg ${
-            shipping === "express" ? "bg-red-200" : "bg-gray-100"
-          }`}
+          className={`px-4 py-2 rounded-lg ${shipping === "express" ? "bg-red-300" : "bg-gray-200"}`}
         >
-          Express (1.5x)
+          Express
         </button>
       </div>
 
-      {/* Product List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((item) => {
-          const adjustedPrice = (item.price * multiplier).toFixed(2);
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {products.map((product) => {
+          const quantity = getQuantity(product.id);
           return (
-            <div
-              key={item.id}
-              className="border rounded-lg overflow-hidden shadow-sm"
-            >
-              <img src={item.image} className="w-full h-60 object-cover" />
-              <div className="p-4">
-                <h2 className="text-lg font-semibold mb-2">{item.title}</h2>
-                <p className="mb-2 text-blue-600 font-medium">
-                  ${adjustedPrice}{" "}
-                  <span className="text-sm text-gray-500">({shipping})</span>
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateQuantity(item.id, -1)}
-                    className="bg-gray-200 p-2 rounded"
-                  >
-                    <FaMinus />
-                  </button>
-                  <span>{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.id, 1)}
-                    className="bg-gray-200 p-2 rounded"
-                  >
-                    <FaPlus />
-                  </button>
-                </div>
+            <div key={product.id} className="border p-4 rounded-lg shadow">
+              <img src={product.image} alt={product.title} className="h-40 w-full object-cover" />
+              <h2 className="font-semibold mt-2">{product.title}</h2>
+              <p>${(product.price * multiplier).toFixed(2)}</p>
+
+              <div className="flex items-center gap-2 mt-3">
+                <button
+                  onClick={() => updateQuantity(product, -1)}
+                  disabled={quantity <= 0}
+                  className="px-3 bg-gray-300 rounded"
+                >-</button>
+                <span className="min-w-[20px] text-center">{quantity}</span>
+                <button
+                  onClick={() => updateQuantity(product, 1)}
+                  className="px-3 bg-gray-300 rounded"
+                >+</button>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Total and Book Button */}
-      <div className="text-center mt-8">
-        <p className="text-xl font-medium">Total: ${total.toFixed(2)}</p>
-        <p className="text-sm text-gray-600 mt-1">
+      <div className="text-center mt-6">
+        <p className="text-xl font-bold">Total: ${total.toFixed(2)}</p>
+          <p className="text-sm text-gray-600 mt-1">
           {shipping === "express"
             ? `You are paying $${priceDifference.toFixed(
                 2
@@ -193,113 +113,27 @@ export default function LaundryBooking() {
             : `You save $${priceDifference.toFixed(2)} with regular delivery.`}
         </p>
         <button
-          className="mt-4 bg-blue-600 text-white px-6 py-2 rounded"
           onClick={() => setDialogOpen(true)}
+          className={`mt-4 px-6 py-2 rounded text-white ${
+            cart.length ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"
+          }`}
+          disabled={cart.length === 0}
         >
           Book Now
         </button>
       </div>
 
-      {/* Booking Dialog */}
       {dialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold mb-4">Your Booking Summary</h2>
-
-            {products
-              .filter((p) => p.quantity > 0)
-              .map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between items-center mb-2"
-                >
-                  <span>
-                    {item.title} (x{item.quantity})
-                  </span>
-                  <div className="flex gap-1">
-                    <button onClick={() => updateQuantity(item.id, -1)}>
-                      <FaMinus />
-                    </button>
-                    <button onClick={() => updateQuantity(item.id, 1)}>
-                      <FaPlus />
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-            {/* Customer Info Inputs */}
-            <input
-              className="w-full border p-2 my-2"
-              placeholder="Full Name"
-              value={customerInfo.name}
-              onChange={(e) =>
-                setCustomerInfo({ ...customerInfo, name: e.target.value })
-              }
-            />
-            <input
-              className="w-full border p-2 my-2"
-              placeholder="Email Address"
-              value={customerInfo.email}
-              onChange={(e) =>
-                setCustomerInfo({ ...customerInfo, email: e.target.value })
-              }
-            />
-            <input
-              className="w-full border p-2 my-2"
-              placeholder="WhatsApp / Phone Number"
-              value={customerInfo.phone}
-              onChange={(e) =>
-                setCustomerInfo({ ...customerInfo, phone: e.target.value })
-              }
-            />
-            <div className="flex items-center gap-2 my-2">
-              <FaMapMarkerAlt className="text-blue-600" />
-              <input
-                className="w-full border p-2"
-                placeholder="Pickup Address"
-                value={customerInfo.pickup}
-                onChange={(e) =>
-                  setCustomerInfo({ ...customerInfo, pickup: e.target.value })
-                }
-              />
-            </div>
-
-            {shipping === "express" && (
-              <div className="flex items-center gap-2 my-2">
-                <FaTruck className="text-red-500" />
-                <input
-                  className="w-full border p-2"
-                  placeholder="Shipping Address (if different)"
-                  value={customerInfo.shippingAddress}
-                  onChange={(e) =>
-                    setCustomerInfo({
-                      ...customerInfo,
-                      shippingAddress: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            )}
-
-            {/* Confirm/Cancel Buttons */}
-            <button
-              className="w-full mt-4 bg-green-600 text-white p-2 rounded"
-              onClick={() => {
-                alert("Thank you! Booking confirmed.");
-                console.log("Order:", { products, customerInfo, shipping });
-                setDialogOpen(false);
-              }}
-            >
-              Confirm Booking
-            </button>
-            <button
-              className="w-full mt-2 text-gray-600 underline"
-              onClick={() => setDialogOpen(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <CheckoutForm
+          products={cart}
+          shipping={shipping}
+          onUpdate={(id, change) => {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            updateQuantity(product, change);
+          }}
+          onClose={() => setDialogOpen(false)}
+        />
       )}
     </div>
   );
