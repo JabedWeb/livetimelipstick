@@ -6,7 +6,11 @@ import { FiCamera, FiRotateCw } from "react-icons/fi";
 import { useLipstickContext } from "@/context/ColorContext";
 import FaceLandmarkerComponent from "@/components/Lipstick/FaceLandmarker";
 
+import { useCart } from "@/context/CartContext";
+
 const LipstickProductPage = () => {
+
+    const { handleAddToCart } = useCart();
   const {
     products,
     selectedShade,
@@ -15,6 +19,19 @@ const LipstickProductPage = () => {
     selectedProduct,
     setIsWebcamActive,
   } = useLipstickContext();
+
+
+     const addToCart = () => {
+    const cartItem = {
+      id:selectedProduct.productId,
+      title: setSelectedProduct.name,
+      image: selectedShade.image,
+      price: selectedProduct.price,
+      variation: selectedProduct ? selectedProduct.name : null,
+    };
+    handleAddToCart(cartItem, quantity); 
+    alert(`${selectedProduct.name} has been added to your cart!`);
+  };
 
   const [quantity, setQuantity] = useState(1);
   const params = useParams();
@@ -152,6 +169,8 @@ const LipstickProductPage = () => {
             </div>
 
             <button
+
+             onClick={addToCart}
               className="mt-5 px-8 py-2 bg-[#e63946] text-white rounded-md"
               disabled={!isInStock}
             >

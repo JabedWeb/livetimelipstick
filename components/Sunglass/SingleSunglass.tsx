@@ -4,6 +4,9 @@ import { useState } from "react";
 import { FiCamera, FiRotateCw } from "react-icons/fi";
 import { useSunglassContext } from "@/context/SunglassContext";
 import FaceLandmarkerSunglassComponent from "./FaceLandmarkerSunglassComponent";
+import { useCart } from "@/context/CartContext";
+
+  const { handleAddToCart } = useCart();
 
 const SingleSunglass = () => {
   const {
@@ -32,6 +35,20 @@ const SingleSunglass = () => {
 
   const toggleWebcam = () => {
     setIsWebcamActive((prev) => !prev);
+  };
+
+
+
+    const addToCart = () => {
+    const cartItem = {
+      id: selectedGlass.id,
+      title: product.name,
+      image: currentImage,
+      price: selectedVariation ? selectedVariation.price : product.price,
+      variation: selectedVariation ? selectedVariation.name : null,
+    };
+    handleAddToCart(cartItem, 1); 
+    alert(`${product.name} has been added to your cart!`);
   };
 
   return (
@@ -131,6 +148,7 @@ const SingleSunglass = () => {
               </button>
             </div>
             <button
+              onClick={addToCart}
               className="mt-5 px-8 py-2 bg-[#e63946] text-white rounded-md"
               disabled={!isInStock}
             >
