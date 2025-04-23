@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Find My Reps</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 8px;
+      width: 150px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 8px 16px;
+    }
+    .rep-card {
+      display: flex;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+    }
+    .rep-card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      margin-right: 20px;
+      object-fit: cover;
+    }
+    .rep-details {
+      flex: 1;
+    }
+    textarea {
+      width: 100%;
+      min-height: 60px;
+      margin-top: 10px;
+    }
+    .save-btn {
+      margin-top: 8px;
+      padding: 5px 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Enter ZIP Code</h2>
+  <input type="text" id="zip" placeholder="e.g. 90210" />
+  <button onclick="fetchReps()">Find Reps</button>
+  <div id="output"></div>
+
+  <script>
+    async function fetchReps() {
+      const zip = document.getElementById('zip').value.trim();
+      const output = document.getElementById('output');
+      output.innerHTML = 'Loading...';
+
+      if (!zip.match(/^\d{5}$/)) {
+        output.innerHTML = 'Enter a valid 5-digit ZIP code.';
+        return;
+      }
+
+      const url = `https://api.allorigins.win/get?url=${encodeURIComponent('http://whoismyrepresentative.com/getall_mems.php?zip=' + zip + '&output=json')}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const reps = JSON.parse(data.contents).results;
+
+        if (!reps || reps.length === 0) {
+          output.innerHTML = 'No results found.';
+          return;
+        }
+
+        output.innerHTML = '';
+        reps.forEach(rep => {
+          const savedNote = localStorage.getItem('rino_note_' + rep.name) || '';
+
+          const card = document.createElement('div');
+          card.className = 'rep-card';
+
+          const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(rep.name)}&background=random`;
+
+          card.innerHTML = `
+            <img src="${avatarUrl}" alt="${rep.name}" />
+            <div class="rep-details">
+              <strong>${rep.name}</strong><br>
+              Party: ${rep.party} | State: ${rep.state} | District: ${rep.district}<br>
+              Phone: ${rep.phone}<br>
+              Office: ${rep.office}<br>
+              Website: <a href="${rep.link}" target="_blank">${rep.link}</a><br><br>
+              <label>RINO Rating / Notes:</label><br>
+              <textarea id="note-${rep.name}">${savedNote}</textarea><br>
+              <button class="save-btn" onclick="saveNote('${rep.name}')">Save Note</button>
+            </div>
+          `;
+          output.appendChild(card);
+        });
+      } catch (err) {
+        console.error(err);
+        output.innerHTML = 'Something went wrong. Please try again later.';
+      }
+    }
+
+    function saveNote(name) {
+      const textarea = document.getElementById('note-' + name);
+      const note = textarea.value;
+      localStorage.setItem('rino_note_' + name, note);
+      alert('Note saved for ' + name);
+    }
+  </script>
+</body>
+</html>
