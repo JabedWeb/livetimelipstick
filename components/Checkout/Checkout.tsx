@@ -88,6 +88,13 @@ export default function Checkout() {
           total: select_shipping.toString(),
         },
       ],
+      coupon_lines: couponCode
+    ? [
+        {
+          code: couponCode,
+        },
+      ]
+    : [],
     };
 
     try {
