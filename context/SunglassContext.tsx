@@ -46,7 +46,7 @@ const defaultSunglasses: SunglassProduct[] = [
     variations: [
       {
         name: "Black Frame",
-        image: "/sunglasses.png",
+        image: "/blacksunglass.png",
         color: "#000000",
         stock: 10,
       },
@@ -68,14 +68,14 @@ const defaultSunglasses: SunglassProduct[] = [
     variations: [
       {
         name: "Gold Frame",
-        image: "/goldround.png",
-        color: "#FFD700",
+        image: "/graysunglass.png",
+        color: "	#808080",
         stock: 6,
       },
       {
         name: "Silver Frame",
-        image: "/silverround.png",
-        color: "#C0C0C0",
+        image: "/skysunglass.png",
+        color: "##87CEEB",
         stock: 3,
       },
     ],
