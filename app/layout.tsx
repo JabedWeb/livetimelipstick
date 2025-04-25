@@ -6,6 +6,7 @@ import Footer from "@/components/Common/Footer";
 import { LipstickProvider } from "@/context/ColorContext";
 import { SunglassProvider } from "@/context/SunglassContext";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -36,7 +37,8 @@ export default function RootLayout({
       <body
         className={` ${jost.className} antialiased`}
       >
-       <CartProvider  >
+       <AuthProvider>
+        <CartProvider  >
          <SunglassProvider>
           <LipstickProvider>
           <Navbar />
@@ -45,6 +47,7 @@ export default function RootLayout({
         </LipstickProvider>
         </SunglassProvider>
        </CartProvider>
+       </AuthProvider>
       </body>
     </html>
   );
