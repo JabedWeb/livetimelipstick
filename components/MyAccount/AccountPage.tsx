@@ -1,5 +1,6 @@
-"use client";
-import { useState } from 'react';
+'use client';
+
+import { useEffect, useState } from 'react';
 import {
   FaRegFileAlt,
   FaGift,
@@ -11,6 +12,10 @@ import {
   FaSignOutAlt,
   FaStar,
 } from 'react-icons/fa';
+import { useAuth } from '@/context/AuthContext';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import fetchFromWooCommerce from '@/utilities/FetchFromWooCommerce';
 
 const menuItems = [
   { label: 'Dashboard', key: 'dashboard', icon: <FaRegFileAlt /> },
@@ -27,6 +32,42 @@ const menuItems = [
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [orders, setOrders] = useState<any[]>([]);
+  const [customer, setCustomer] = useState<any>(null);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+    }
+  }, [user, router]);
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const { data: customers } = await fetchFromWooCommerce('customers', {
+        email: user.email,
+      });
+
+      const customer = customers?.[0];
+      setCustomer(customer);
+
+      const { data: orders } = await fetchFromWooCommerce('orders', {
+        customer: customer.id,
+      });
+
+      setOrders(orders);
+    } catch (error) {
+      console.error('Error fetching WooCommerce data:', error);
+    }
+  };
+
+  if (user?.email) {
+    fetchData();
+  }
+}, [user]);
+
 
   const renderContent = () => {
     switch (activeTab) {
@@ -34,28 +75,43 @@ export default function AccountPage() {
         return (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Your Orders</h2>
-            {/* Simulated Orders */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="bg-gray-800 p-4 rounded">Order #12345 - Completed</div>
-              <div className="bg-gray-800 p-4 rounded">Order #12346 - Pending</div>
-            </div>
+            {orders.length === 0 ? (
+              <p>No orders found.</p>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {orders.map((order) => (
+                  <div key={order.id} className="bg-gray-800 p-4 rounded">
+                    Order #{order.id} - {order.status.toUpperCase()} <br />
+                    Total: {order.total} {order.currency}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
-      case 'wishlist':
+
+      case 'account':
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Your Wishlist</h2>
-            {/* Simulated Wishlist */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="bg-gray-800 p-4 rounded">🧴 Natural Face Cream</div>
-              <div className="bg-gray-800 p-4 rounded">🧼 Organic Soap Bar</div>
-            </div>
+            <h2 className="text-2xl font-semibold mb-4">Account Details</h2>
+            {customer ? (
+              <ul className="space-y-2">
+                <li><strong>Name:</strong> {customer.first_name} {customer.last_name}</li>
+                <li><strong>Email:</strong> {customer.email}</li>
+                <li><strong>Phone:</strong> {customer.billing?.phone}</li>
+                <li><strong>Address:</strong> {customer.billing?.address_1}, {customer.billing?.city}</li>
+              </ul>
+            ) : (
+              <p>Loading customer info...</p>
+            )}
           </div>
         );
-      case 'account':
-        return <p>Edit your account details here...</p>;
+
       case 'logout':
-        return <p>You have been logged out.</p>;
+        logout();
+        router.push('/');
+        return null;
+
       default:
         return (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -73,7 +129,7 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold">My account</h1>
+        <h1 className="text-4xl font-bold">My Account</h1>
         <p className="text-sm text-gray-400 mt-1">HOME / MY ACCOUNT</p>
       </div>
 
@@ -99,7 +155,7 @@ export default function AccountPage() {
           </ul>
         </div>
 
-        {/* Dynamic Right Side */}
+        {/* Dynamic Content */}
         <div className="md:col-span-3">{renderContent()}</div>
       </div>
     </div>
