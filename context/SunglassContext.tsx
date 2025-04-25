@@ -67,15 +67,15 @@ const defaultSunglasses: SunglassProduct[] = [
     reviews: 89,
     variations: [
       {
-        name: "Gold Frame",
+        name: "Gray Frame",
         image: "/graysunglass.png",
-        color: "	#808080",
+        color: "#808080",
         stock: 6,
       },
       {
-        name: "Silver Frame",
+        name: "Sky Blue Frame",
         image: "/skysunglass.png",
-        color: "##87CEEB",
+        color: "#87CEEB",
         stock: 3,
       },
     ],
