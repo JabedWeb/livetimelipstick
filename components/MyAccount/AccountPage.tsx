@@ -20,13 +20,13 @@ import fetchFromWooCommerce from '@/utilities/FetchFromWooCommerce';
 const menuItems = [
   { label: 'Dashboard', key: 'dashboard', icon: <FaRegFileAlt /> },
   { label: 'Orders', key: 'orders', icon: <FaRegFileAlt /> },
-  { label: 'Gift Cards', key: 'giftcards', icon: <FaGift /> },
-  { label: 'Downloads', key: 'downloads', icon: <FaDownload /> },
-  { label: 'Addresses', key: 'addresses', icon: <FaMapMarkerAlt /> },
+  // { label: 'Gift Cards', key: 'giftcards', icon: <FaGift /> },
+  // { label: 'Downloads', key: 'downloads', icon: <FaDownload /> },
+  // { label: 'Addresses', key: 'addresses', icon: <FaMapMarkerAlt /> },
   { label: 'Payment methods', key: 'payment', icon: <FaCreditCard /> },
   { label: 'Account details', key: 'account', icon: <FaUser /> },
   { label: 'Wishlist', key: 'wishlist', icon: <FaHeart /> },
-  { label: 'My Points', key: 'points', icon: <FaStar /> },
+  // { label: 'My Points', key: 'points', icon: <FaStar /> },
   { label: 'Logout', key: 'logout', icon: <FaSignOutAlt /> },
 ];
 

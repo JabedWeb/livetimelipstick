@@ -6,6 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import fetchFromWooCommerce from '@/utilities/FetchFromWooCommerce';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Checkout() {
   const { cartItems, totalPrice ,handleClearCart} = useCart();
@@ -29,7 +30,7 @@ export default function Checkout() {
   const [discount, setDiscount] = useState(0);
   const [couponError, setCouponError] = useState('');
   const [shippingCost, setShippingCost] = useState(50);
-  const [paymentMethod, setPaymentMethod] = useState('creditCard');
+  const [paymentMethod, setPaymentMethod] = useState('cashOnDelivery');
   const [customerId, setCustomerId] = useState<number | undefined>(undefined);
   const [formError, setFormError] = useState('');
 
@@ -171,8 +172,20 @@ export default function Checkout() {
 
   const totalWithDiscount = totalPrice - discount;
   const grandTotal = totalWithDiscount + shippingCost;
+  if (cartItems.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-gray-500 text-lg">Your cart is empty.</p>
+        <Link href="/" className="ml-4 text-blue-500 underline">
+          Go to Home </Link>
+      </div>
+    );
+  }
+
 
   return (
+
+    
     <div className="max-w-7xl mx-auto p-6 text-black">
        {formError && <p className="text-red-600 mb-4 text-sm font-semibold">{formError}</p>}
       <div className="text-center mb-4">
@@ -269,7 +282,7 @@ export default function Checkout() {
           </div>
 
           <div className="mt-4 space-y-2 text-sm">
-            <label><input type="radio" value="creditCard" checked={paymentMethod === 'creditCard'} onChange={(e) => setPaymentMethod(e.target.value)} /> Debit/Credit Card</label><br />
+            {/* <label><input type="radio" value="creditCard" checked={paymentMethod === 'creditCard'} onChange={(e) => setPaymentMethod(e.target.value)} /> Debit/Credit Card</label><br /> */}
             <label><input type="radio" value="bKash" checked={paymentMethod === 'bKash'} onChange={(e) => setPaymentMethod(e.target.value)} /> bKash/Nagad</label><br />
             <label><input type="radio" value="cashOnDelivery" checked={paymentMethod === 'cashOnDelivery'} onChange={(e) => setPaymentMethod(e.target.value)} /> Cash On Delivery</label>
           </div>

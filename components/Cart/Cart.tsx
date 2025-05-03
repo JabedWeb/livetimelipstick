@@ -64,7 +64,7 @@ export default function Cart() {
           )}
 
           {/* Coupon Section */}
-          <div className="flex items-center mt-6">
+          {/* <div className="flex items-center mt-6">
             <input
               type="text"
               placeholder="Coupon Code"
@@ -73,10 +73,10 @@ export default function Cart() {
             <button className="ml-4 rounded-md bg-black text-white p-2">
               Apply Coupon
             </button>
-          </div>
+          </div> */}
 
           {/* Gift Card Section */}
-          <div className="flex items-center mt-4">
+          {/* <div className="flex items-center mt-4">
             <input
               type="text"
               placeholder="Gift Card Code"
@@ -85,7 +85,7 @@ export default function Cart() {
             <button className="ml-4 rounded-md bg-black text-white p-2">
               Apply Gift Card
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Basket Summary Section */}
