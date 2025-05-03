@@ -24,7 +24,8 @@ const LipstickProductPage = () => {
      const addToCart = () => {
     const cartItem = {
       id:selectedProduct.productId,
-      title: setSelectedProduct.name,
+      title: selectedProduct.name ,
+      quantity: quantity,
       image: selectedShade.image,
       price: selectedProduct.price,
       variation: selectedProduct ? selectedProduct.name : null,
@@ -43,7 +44,7 @@ const LipstickProductPage = () => {
     const foundProduct = products.find((p) => p.productId === productId);
     if (foundProduct) {
       setSelectedProduct(foundProduct);
-      setSelectedShade(foundProduct.shades[0]); // Set initial shade
+      setSelectedShade(foundProduct.shades[0]);
     }
   }, [productId, products, setSelectedProduct, setSelectedShade]);
 

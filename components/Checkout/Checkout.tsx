@@ -13,6 +13,8 @@ export default function Checkout() {
   const { user } = useAuth();
   const router = useRouter();
 
+  console.log(cartItems, 'cartItems');
+
   const [billing, setBilling] = useState({
     firstName: '',
     lastName: '',
@@ -137,7 +139,7 @@ export default function Checkout() {
         product_id: item.id,
         quantity: item.quantity,
         total: (item.price * item.quantity).toFixed(2),
-        name : item.name + item.variation ? ` (${item.variation})` : '',
+        name: `${item.title} ${item.variation || ''}`.trim(),
       })),
       shipping_lines: [
         {

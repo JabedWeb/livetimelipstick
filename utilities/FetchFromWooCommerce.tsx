@@ -2,7 +2,6 @@
 import axios from 'axios';
 
 const fetchFromWooCommerce = async (endpoint, params = {}) => {
-  // Check for credentials from environment variables or localStorage
 const domain = process.env.NEXT_PUBLIC_domain || localStorage.getItem("wooDomain");
   const consumerKey = process.env.NEXT_PUBLIC_consumerKey || localStorage.getItem("wooConsumerKey");
   const consumerSecret = process.env.NEXT_PUBLIC_consumerSecret || localStorage.getItem("wooConsumerSecret");
@@ -19,7 +18,7 @@ const domain = process.env.NEXT_PUBLIC_domain || localStorage.getItem("wooDomain
       params: {
         consumer_key: consumerKey,
         consumer_secret: consumerSecret,
-        ...params, // Additional params passed by the component
+        ...params, 
       },
     });
     return { data: response.data, error: null, headers: response.headers };
