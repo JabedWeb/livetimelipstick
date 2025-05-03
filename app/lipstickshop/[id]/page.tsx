@@ -121,11 +121,11 @@ const LipstickProductPage = () => {
             </span>
           </div>
 
-          <div className="mt-4 flex items-center space-x-2">
+          {/* <div className="mt-4 flex items-center space-x-2">
             <button className="flex items-center bg-[#2a9d8f] text-white px-4 py-2 rounded-lg">
               Purchase this item and get {selectedProduct.points} Points
             </button>
-          </div>
+          </div> */}
 
           <div className="mt-5">
             <p className="text-lg font-semibold">Shades:</p>

@@ -21,10 +21,10 @@ export default function Cart() {
         <span className="text-sm text-gray-500">Order Complete</span>
       </div>
 
-      <div className="bg-teal-100 p-2 mb-4">
+      {/* <div className="bg-teal-100 p-2 mb-4">
         <BiInfoCircle className="inline-block mr-2 text-xl" />
         If you proceed to checkout, you will earn <strong>{Math.round(totalPrice / 10)} Points!</strong>
-      </div>
+      </div> */}
 
       <div className="flex flex-col lg:flex-row justify-between gap-8 mb-8">
         {/* Product Section */}

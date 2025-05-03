@@ -122,11 +122,11 @@ const SingleSunglass = () => {
             <span>🕶️ Stylish • UV Protected • Comfortable</span>
           </div>
 
-          <div className="mt-4 flex items-center space-x-2">
+          {/* <div className="mt-4 flex items-center space-x-2">
             <button className="flex items-center bg-[#2a9d8f] text-white px-4 py-2 rounded-lg">
               Try this glass in AR & earn 100 Points
             </button>
-          </div>
+          </div> */}
 
           <div className="mt-5">
             <p className="text-lg font-semibold">Models:</p>
