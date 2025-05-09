@@ -163,7 +163,7 @@ export default function FaceLandmarkerComponent() {
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
-        zIndex: isWebcamActive ? 10 : -1,
+        zIndex: isWebcamActive ? 100 : -1,
       }}
     >
       <div

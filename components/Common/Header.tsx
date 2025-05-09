@@ -5,11 +5,22 @@ import { usePathname } from 'next/navigation';
 import { FaShoppingCart, FaUserCircle } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { useEffect, useState } from 'react';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
+    const [showToast, setShowToast] = useState(false);
+
+      // Show toast when cart item count changes
+  useEffect(() => {
+    if (totalItems > 0) {
+      setShowToast(true);
+      const timer = setTimeout(() => setShowToast(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [totalItems]);
 
   const links = [
     { name: 'Home', path: '/' },
@@ -18,6 +29,17 @@ export default function Navbar() {
   ];
 
   return (
+    <>
+
+          {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-40 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded shadow-lg transition-all animate-bounce">
+          ✅ Item added to cart!
+        </div>
+      )}
+
+    
+  
     <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
       {/* Promo */}
       <div className="bg-black text-white text-sm text-center py-2">
@@ -85,5 +107,6 @@ export default function Navbar() {
         </div>
       </nav>
     </header>
+  </>
   );
 }

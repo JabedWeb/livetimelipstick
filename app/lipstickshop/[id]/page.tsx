@@ -5,12 +5,10 @@ import { useParams } from "next/navigation";
 import { FiCamera, FiRotateCw } from "react-icons/fi";
 import { useLipstickContext } from "@/context/ColorContext";
 import FaceLandmarkerComponent from "@/components/Lipstick/FaceLandmarker";
-
 import { useCart } from "@/context/CartContext";
 
 const LipstickProductPage = () => {
-
-    const { handleAddToCart } = useCart();
+  const { handleAddToCart } = useCart();
   const {
     products,
     selectedShade,
@@ -20,23 +18,8 @@ const LipstickProductPage = () => {
     setIsWebcamActive,
   } = useLipstickContext();
 
-
-    const addToCart = () => {
-    const cartItem = {
-      id:selectedProduct.productId,
-      title: selectedProduct.name ,
-      quantity: quantity,
-      image: selectedShade.image,
-      price: selectedProduct.price,
-      variation: selectedShade ? selectedShade.name : null,
-    };
-    handleAddToCart(cartItem, quantity); 
-  };
-
   const [quantity, setQuantity] = useState(1);
   const params = useParams();
-
-  // Get product ID from the URL
   const productId = parseInt(params?.id as string);
 
   useEffect(() => {
@@ -45,9 +28,10 @@ const LipstickProductPage = () => {
       setSelectedProduct(foundProduct);
       setSelectedShade(foundProduct.shades[0]);
     }
-  }, [productId, products, setSelectedProduct, setSelectedShade]);
+  }, [productId, products]);
 
-  if (!selectedProduct) return <p className="text-center">Product not found.</p>;
+  if (!selectedProduct)
+    return <p className="text-center text-white">Product not found.</p>;
 
   const isInStock = selectedShade?.stock > 0;
 
@@ -68,11 +52,23 @@ const LipstickProductPage = () => {
     setIsWebcamActive((prev) => !prev);
   };
 
+  const addToCart = () => {
+    const cartItem = {
+      id: selectedProduct.productId,
+      title: selectedProduct.name,
+      quantity,
+      image: selectedShade.image,
+      price: selectedProduct.price,
+      variation: selectedShade?.name || null,
+    };
+    handleAddToCart(cartItem, quantity);
+  };
+
   return (
     <>
       <FaceLandmarkerComponent />
 
-      <div className="container mx-auto grid md:grid-cols-2 gap-10 p-8">
+      <div className="container mx-auto grid md:grid-cols-2 gap-10 p-8 text-white">
         {/* Left */}
         <div>
           <div className="relative">
@@ -82,10 +78,13 @@ const LipstickProductPage = () => {
               className="w-[350px] h-[350px] mx-auto rounded-lg object-cover shadow-lg"
             />
             <div className="absolute top-4 right-4 space-x-2">
-              <button className="bg-[#f8e6e9] p-2 rounded-full shadow-lg" onClick={toggleWebcam}>
+              <button
+                className="bg-white/10 p-2 rounded-full shadow-lg hover:bg-white/20 transition"
+                onClick={toggleWebcam}
+              >
                 <FiCamera size={24} className="text-[#e63946]" />
               </button>
-              <button className="bg-[#f8e6e9] p-2 rounded-full shadow-lg">
+              <button className="bg-white/10 p-2 rounded-full shadow-lg hover:bg-white/20 transition">
                 <FiRotateCw size={24} className="text-[#e63946]" />
               </button>
             </div>
@@ -99,7 +98,9 @@ const LipstickProductPage = () => {
                 alt={`lipstick-${index}`}
                 onClick={() => handleShadeChange(shade)}
                 className={`w-20 h-20 rounded-lg cursor-pointer shadow-md ${
-                  selectedShade.image === shade.image ? "border-2 border-[#e63946]" : ""
+                  selectedShade.image === shade.image
+                    ? "border-2 border-[#e63946]"
+                    : "border-2 border-transparent"
                 }`}
               />
             ))}
@@ -109,31 +110,35 @@ const LipstickProductPage = () => {
         {/* Right */}
         <div>
           <h1 className="text-3xl font-bold text-[#e63946]">{selectedProduct.name}</h1>
-          <p className="text-xl mt-2 text-[#333]">৳{selectedProduct.price.toFixed(2)}</p>
-          <p className={isInStock ? "text-[#2a9d8f] mt-1" : "text-[#e63946] mt-1"}>
+          <p className="text-xl mt-2 text-gray-300">
+            ৳{selectedProduct.price.toFixed(2)}
+          </p>
+          <p className={`mt-1 ${isInStock ? "text-green-400" : "text-red-500"}`}>
             {isInStock ? "In Stock" : "Out of Stock"}
           </p>
 
-          <div className="mt-3 flex items-center space-x-2 text-[#f4a261]">
+          <div className="mt-3 flex items-center space-x-2 text-yellow-400">
             <span>
               ⭐{selectedProduct.rating} ({selectedProduct.reviews} Reviews)
             </span>
           </div>
 
           <div className="mt-5">
-            <p className="text-lg font-semibold">Shades:</p>
+            <p className="text-lg font-semibold text-white">Shades:</p>
             <div className="flex space-x-3 mt-2">
               {selectedProduct.shades.map((shade, index) => (
                 <button
                   key={index}
                   className={`w-8 h-8 relative rounded-full border ${
-                    selectedShade.hex === shade.hex ? "border-[#e63946]" : ""
+                    selectedShade.hex === shade.hex
+                      ? "border-[#e63946]"
+                      : "border-white/20"
                   }`}
                   style={{ backgroundColor: shade.hex }}
                   onClick={() => handleShadeChange(shade)}
                 >
                   {selectedShade.name === shade.name && (
-                    <span className="absolute top-[50px] left-1/2 transform -translate-x-1/2 text-sm text-gray-700 whitespace-nowrap">
+                    <span className="absolute top-[50px] left-1/2 transform -translate-x-1/2 text-xs text-gray-300 whitespace-nowrap">
                       {shade.name}
                     </span>
                   )}
@@ -143,10 +148,10 @@ const LipstickProductPage = () => {
           </div>
 
           <div className="mt-10">
-            <p className="text-lg font-semibold">Quantity:</p>
+            <p className="text-lg font-semibold text-white">Quantity:</p>
             <div className="flex space-x-3 mt-2">
               <button
-                className="px-4 py-2 bg-gray-200 rounded-md"
+                className="px-4 py-2 bg-white/10 rounded-md text-white hover:bg-white/20"
                 onClick={() => handleQuantityChange(false)}
                 disabled={quantity === 1}
               >
@@ -154,7 +159,7 @@ const LipstickProductPage = () => {
               </button>
               <span className="px-4 py-2">{quantity}</span>
               <button
-                className="px-4 py-2 bg-gray-200 rounded-md"
+                className="px-4 py-2 bg-white/10 rounded-md text-white hover:bg-white/20"
                 onClick={() => handleQuantityChange(true)}
                 disabled={quantity === selectedShade.stock}
               >
@@ -163,9 +168,8 @@ const LipstickProductPage = () => {
             </div>
 
             <button
-
-             onClick={addToCart}
-              className="mt-5 px-8 py-2 bg-[#e63946] text-white rounded-md"
+              onClick={addToCart}
+              className="mt-5 px-8 py-3 bg-[#e63946] text-white font-semibold rounded-md w-full hover:bg-[#d62828] transition"
               disabled={!isInStock}
             >
               Add to Cart

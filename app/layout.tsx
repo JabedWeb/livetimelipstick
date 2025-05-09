@@ -39,7 +39,7 @@ export default function RootLayout({
       </head>
 
       <body
-        className={` ${jost.className} antialiased`}
+        className={` ${jost.className} bg-black antialiased`}
       >
 
         
