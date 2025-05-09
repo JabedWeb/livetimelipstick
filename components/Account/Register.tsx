@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
@@ -32,7 +33,7 @@ const Register = () => {
     }
 
     try {
-      const res = await axios.post(
+      await axios.post(
         'https://jabedweb.shadhinweb.com/wp-json/wc/v3/customers',
         {
           email,
@@ -58,83 +59,87 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto md:flex items-center">
-      <div className="md:w-1/2">
-        <img className="w-full" src="/register.png" alt="register page" />
-      </div>
-      <div className="md:w-1/2 p-4">
-        <h1 className="text-3xl font-semibold">Create New Account</h1>
-        <p>Please enter your details</p>
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
+      <div className="max-w-6xl mx-auto md:flex rounded-lg overflow-hidden shadow-xl">
+        {/* Image Section */}
+        <div className="md:w-1/2 hidden md:block">
+          <img src="/register.png" alt="Register" className="w-full h-full object-cover" />
+        </div>
 
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-        {success && <p className="text-green-600 mt-2">{success}</p>}
+        {/* Form Section */}
+        <div className="md:w-1/2 w-full p-8 space-y-6">
+          <h1 className="text-3xl font-bold">Create New Account</h1>
+          <p className="text-gray-400">Please enter your details</p>
 
-        <form onSubmit={handleSubmit}>
-          <div className="my-4">
-            <label>First Name</label>
-            <input
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              placeholder="Jabed"
-              className="w-full rounded-md py-3 px-2 border-2 border-black"
-              type="text"
-            />
-          </div>
-          <div className="my-4">
-            <label>Last Name</label>
-            <input
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              placeholder="Hossen"
-              className="w-full rounded-md py-3 px-2 border-2 border-black"
-              type="text"
-            />
-          </div>
-          <div className="my-4">
-            <label>Email Address</label>
-            <input
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="jabed@example.com"
-              className="w-full rounded-md py-3 px-2 border-2 border-black"
-              type="email"
-            />
-          </div>
-          <div>
-            <label>Password</label>
-            <input
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full rounded-md py-3 px-2 border-2 border-black"
-              type="password"
-            />
-          </div>
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {success && <p className="text-green-400 text-sm">{success}</p>}
 
-          <div className="flex justify-between items-center mt-2">
-            <input className="scale-150" type="checkbox" defaultChecked />
-            <label className="ml-2">
-              I agree to the{' '}
-              <a className="font-semibold" href="#">
-                Terms and Conditions
-              </a>
-            </label>
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm mb-1">First Name</label>
+              <input
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="Jabed"
+                className="w-full px-3 py-3 rounded-md bg-black border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Last Name</label>
+              <input
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Hossen"
+                className="w-full px-3 py-3 rounded-md bg-black border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Email Address</label>
+              <input
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="jabed@example.com"
+                className="w-full px-3 py-3 rounded-md bg-black border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                type="email"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Password</label>
+              <input
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-3 py-3 rounded-md bg-black border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                type="password"
+              />
+            </div>
 
-          <input
-            className="w-full cursor-pointer bg-black text-white py-3 px-2 rounded-md font-semibold mt-4"
-            type="submit"
-            value="Sign Up"
-          />
-        </form>
+            <div className="flex items-center">
+              <input type="checkbox" defaultChecked className="mr-2 scale-125 accent-teal-500" />
+              <label className="text-sm text-gray-300">
+                I agree to the{' '}
+                <a href="#" className="underline text-white font-medium">
+                  Terms and Conditions
+                </a>
+              </label>
+            </div>
 
-        <div className="mt-2">
-          <p>
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#e63946] hover:bg-[#c92f3d] transition rounded-md text-white font-semibold"
+            >
+              Sign Up
+            </button>
+          </form>
+
+          <p className="text-sm text-gray-400">
             Already registered?{' '}
-            <Link className="font-semibold" href="/login">
+            <Link href="/login" className="text-white font-semibold hover:underline">
               Login
             </Link>
           </p>
