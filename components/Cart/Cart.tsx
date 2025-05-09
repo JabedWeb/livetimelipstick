@@ -2,115 +2,108 @@
 
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
-import { BiInfoCircle } from "react-icons/bi";
+import { BiX } from "react-icons/bi";
 
 export default function Cart() {
   const {
     cartItems,
     totalPrice,
     handleUpdateCartItem,
+    handleRemoveCartItem,
   } = useCart();
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="text-center my-4">
-        <span className="text-sm text-gray-500">Shopping Cart</span>
-        <span className="mx-2">→</span>
-        <span className="text-sm text-gray-500">Checkout</span>
-        <span className="mx-2">→</span>
-        <span className="text-sm text-gray-500">Order Complete</span>
+    <div className="max-w-7xl mx-auto p-6 text-white">
+      <div className="text-center my-8">
+        <h2 className="text-2xl font-semibold tracking-wide uppercase text-gray-400">
+          Shopping Cart
+        </h2>
+        <div className="text-sm mt-2 text-gray-500">
+          <span>Cart</span> <span className="mx-1">→</span>{" "}
+          <span>Checkout</span> <span className="mx-1">→</span>{" "}
+          <span>Complete</span>
+        </div>
       </div>
 
-      {/* <div className="bg-teal-100 p-2 mb-4">
-        <BiInfoCircle className="inline-block mr-2 text-xl" />
-        If you proceed to checkout, you will earn <strong>{Math.round(totalPrice / 10)} Points!</strong>
-      </div> */}
-
-      <div className="flex flex-col lg:flex-row justify-between gap-8 mb-8">
-        {/* Product Section */}
-        <div className="w-full lg:w-3/5">
-          {cartItems.length === 0 ? (
-            <p className="text-gray-600">Your cart is empty.</p>
-          ) : (
-            cartItems.map((item) => (
+      {cartItems.length === 0 ? (
+        <p className="text-center text-gray-500">Your cart is empty.</p>
+      ) : (
+        <div className="flex flex-col lg:flex-row justify-between gap-10">
+          {/* Cart Items */}
+          <div className="w-full lg:w-2/3">
+            {cartItems.map((item, index) => (
               <div
-                key={item.id}
-                className="flex items-center border-b pb-4 mb-4"
+                key={`${item.id}-${item.variation}`}
+                className="flex items-center gap-4 bg-[#111] border border-gray-800 p-4 rounded-lg mb-4 shadow-sm"
               >
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-24 h-24 object-cover"
+                  className="w-24 h-24 rounded-md object-cover"
                 />
-                <div className="ml-4 flex-grow">
-                  <h2 className="text-lg font-semibold">{item.title}</h2>
-                  <p className="text-gray-500">Price: ৳{item.price}</p>
-                  <div className="flex items-center mt-2">
-                    <span>Quantity:</span>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold">{item.title}</h3>
+                  {item.variation && (
+                    <p className="text-sm text-gray-400 mb-1">
+                      Variant: <span className="font-medium">{item.variation}</span>
+                    </p>
+                  )}
+                  <p className="text-gray-500 text-sm">৳{item.price}</p>
+
+                  <div className="flex items-center mt-2 gap-3">
+                    <label className="text-sm">Qty:</label>
                     <input
                       type="number"
                       min="1"
                       value={item.quantity}
                       onChange={(e) =>
-                        handleUpdateCartItem(item.id, parseInt(e.target.value))
+                        handleUpdateCartItem(item, parseInt(e.target.value))
                       }
-                      className="w-12 ml-2 p-1 border"
+                      className="w-16 bg-transparent border border-gray-600 text-white p-1 text-center rounded-md"
                     />
                   </div>
                 </div>
-                <p className="ml-auto">৳{(item.quantity * item.price).toFixed(2)}</p>
+
+                <div className="text-right">
+                  <p className="font-semibold text-lg">
+                    ৳{(item.quantity * item.price).toFixed(2)}
+                  </p>
+                  <button
+                    onClick={() => handleRemoveCartItem(item)}
+                    className="text-red-400 text-sm mt-2 hover:text-red-600 flex items-center gap-1"
+                  >
+                    <BiX className="text-lg" />
+                    Remove
+                  </button>
+                </div>
               </div>
-            ))
-          )}
+            ))}
+          </div>
 
-          {/* Coupon Section */}
-          {/* <div className="flex items-center mt-6">
-            <input
-              type="text"
-              placeholder="Coupon Code"
-              className="border border-black rounded-md p-2 w-2/3"
-            />
-            <button className="ml-4 rounded-md bg-black text-white p-2">
-              Apply Coupon
-            </button>
-          </div> */}
-
-          {/* Gift Card Section */}
-          {/* <div className="flex items-center mt-4">
-            <input
-              type="text"
-              placeholder="Gift Card Code"
-              className="border border-black rounded-md p-2 w-2/3"
-            />
-            <button className="ml-4 rounded-md bg-black text-white p-2">
-              Apply Gift Card
-            </button>
-          </div> */}
+          {/* Order Summary */}
+          <div className="w-full lg:w-1/3 bg-[#111] p-6 rounded-lg border border-gray-800 shadow-sm">
+            <h4 className="text-xl font-bold mb-4">Order Summary</h4>
+            <div className="flex justify-between mb-2 text-sm text-gray-400">
+              <span>Subtotal</span>
+              <span>৳{totalPrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between mb-2 text-sm text-gray-400">
+              <span>Shipping</span>
+              <span>Will be calculated</span>
+            </div>
+            <div className="border-t border-gray-700 mt-4 pt-4 flex justify-between font-semibold text-white">
+              <span>Total</span>
+              <span>৳{totalPrice.toFixed(2)}</span>
+            </div>
+            <Link
+              href="/checkout"
+              className="mt-6 block text-center bg-red-500 hover:bg-red-600 transition py-3 rounded-md text-white font-semibold"
+            >
+              Proceed to Checkout
+            </Link>
+          </div>
         </div>
-
-        {/* Basket Summary Section */}
-        <div className="w-full lg:w-1/3 bg-gray-100 p-4 rounded-md shadow-md">
-          <h3 className="font-bold text-lg mb-4">Basket totals</h3>
-          <div className="flex justify-between mb-2">
-            <p>Subtotal</p>
-            <p>৳{totalPrice.toFixed(2)}</p>
-          </div>
-          <div className="flex justify-between mb-4">
-            <p>Shipping</p>
-            <p>Will be updated at checkout</p>
-          </div>
-          <div className="flex justify-between font-bold">
-            <p>Total</p>
-            <p>৳{totalPrice.toFixed(2)}</p>
-          </div>
-          <Link
-            href="/checkout"
-            className="block text-center bg-black text-white py-2 mt-4 rounded-md"
-          >
-            Proceed to Checkout
-          </Link>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,14 +1,9 @@
-
-import ProductGrid from "@/components/Grid";
-import { LipstickProvider } from "@/context/ColorContext";
-
+import LandingPage from "@/components/Home/LandingPage";
 
 export default function Home() {
   return (
     <div>
-      <LipstickProvider>
-           <ProductGrid />
-      </LipstickProvider>
+      <LandingPage />
     </div>
   );
 }

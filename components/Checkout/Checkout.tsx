@@ -139,7 +139,10 @@ export default function Checkout() {
         product_id: item.id,
         quantity: item.quantity,
         total: (item.price * item.quantity).toFixed(2),
-        name: `${item.title} ${item.variation || ''}`.trim(),
+        name: item.title,
+        meta_data: item.variation
+          ? [{ key: 'Variation', value: item.variation }]
+          : [],
       })),
       shipping_lines: [
         {
@@ -190,8 +193,11 @@ export default function Checkout() {
     
     <div className="max-w-7xl mx-auto p-6 text-black">
        {formError && <p className="text-red-600 mb-4 text-sm font-semibold">{formError}</p>}
-      <div className="text-center mb-4">
-        <p className="text-sm text-gray-500">Shopping Cart → <span className="font-semibold text-black">Checkout</span> → <span className="text-gray-500">Complete</span></p>
+     <div className="text-center mb-6">
+        <p className="text-sm text-gray-500">
+          Shopping Cart → <span className="font-semibold text-black">Checkout</span> →{' '}
+          <span className="text-gray-500">Complete</span>
+        </p>
       </div>
 
       {!user && (

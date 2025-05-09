@@ -66,7 +66,6 @@ const SingleSunglass = () => {
       variation: selectedVariant ? selectedVariant.name : null,
     };
     handleAddToCart(cartItem, quantity); 
-    alert(`${selectedGlassProduct.name} has been added to your cart!`);
   };
 
   return (

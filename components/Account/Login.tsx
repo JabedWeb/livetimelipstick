@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -81,7 +82,7 @@ const Login = () => {
 
         <div className="mt-2">
           <p>
-            Don&apos;t have an account? <a className="font-semibold" href="/register">Sign up</a>
+            Don&apos;t have an account? <Link href={"/register"} className="text-black font-semibold hover:underline">Register</Link>
           </p>
         </div>
       </div>

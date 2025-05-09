@@ -1,15 +1,23 @@
+// Get cart from localStorage
 export const getCart = () => JSON.parse(localStorage.getItem("cart")) || [];
 
-export const saveCart = (cart) =>
+// Save cart to localStorage
+export const saveCart = (cart) => {
   localStorage.setItem("cart", JSON.stringify(cart));
+};
 
+// Add a product to cart (with variation like color/frame)
 export const addToCart = (product, quantity = 1) => {
-  let cart = getCart();
-  const existingProductIndex = cart.findIndex((item) => item.id === product.id);
+  const cart = getCart();
 
-  if (existingProductIndex >= 0) {
-    cart[existingProductIndex].quantity += quantity;
-    cart[existingProductIndex].totalPrice += product.price * quantity;
+  // Match by ID and variation only
+  const isSameProduct = (a, b) => a.id === b.id && a.variation === b.variation;
+
+  const existingIndex = cart.findIndex((item) => isSameProduct(item, product));
+
+  if (existingIndex >= 0) {
+    cart[existingIndex].quantity += quantity;
+    cart[existingIndex].totalPrice += product.price * quantity;
   } else {
     cart.push({
       ...product,
@@ -21,27 +29,36 @@ export const addToCart = (product, quantity = 1) => {
   saveCart(cart);
 };
 
-export const updateCartItem = (productId, quantity) => {
-  let cart = getCart();
-  const productIndex = cart.findIndex((item) => item.id === productId);
+// Update quantity for a specific variation
+export const updateCartItem = (targetItem, quantity) => {
+  const cart = getCart();
 
-  if (productIndex >= 0) {
+  const isSameProduct = (a, b) => a.id === b.id && a.variation === b.variation;
+
+  const index = cart.findIndex((item) => isSameProduct(item, targetItem));
+
+  if (index >= 0) {
     if (quantity > 0) {
-      cart[productIndex].quantity = quantity;
-      cart[productIndex].totalPrice = cart[productIndex].price * quantity;
+      cart[index].quantity = quantity;
+      cart[index].totalPrice = cart[index].price * quantity;
     } else {
-      cart.splice(productIndex, 1);
+      cart.splice(index, 1);
     }
     saveCart(cart);
   }
 };
 
-export const removeCartItem = (productId) => {
-  let cart = getCart();
-  cart = cart.filter((item) => item.id !== productId);
-  saveCart(cart);
+// Remove a specific variation
+export const removeCartItem = (targetItem) => {
+  const cart = getCart();
+
+  const isSameProduct = (a, b) => a.id === b.id && a.variation === b.variation;
+
+  const updatedCart = cart.filter((item) => !isSameProduct(item, targetItem));
+  saveCart(updatedCart);
 };
 
+// Clear the cart
 export const clearCart = () => {
   localStorage.removeItem("cart");
 };

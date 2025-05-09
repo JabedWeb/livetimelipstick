@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import axios from 'axios';
+import Link from 'next/link';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -133,9 +134,9 @@ const Register = () => {
         <div className="mt-2">
           <p>
             Already registered?{' '}
-            <a className="font-semibold" href="/login">
+            <Link className="font-semibold" href="/login">
               Login
-            </a>
+            </Link>
           </p>
         </div>
       </div>

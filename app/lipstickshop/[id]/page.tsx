@@ -21,17 +21,16 @@ const LipstickProductPage = () => {
   } = useLipstickContext();
 
 
-     const addToCart = () => {
+    const addToCart = () => {
     const cartItem = {
       id:selectedProduct.productId,
       title: selectedProduct.name ,
       quantity: quantity,
       image: selectedShade.image,
       price: selectedProduct.price,
-      variation: selectedProduct ? selectedProduct.name : null,
+      variation: selectedShade ? selectedShade.name : null,
     };
     handleAddToCart(cartItem, quantity); 
-    alert(`${selectedProduct.name} has been added to your cart!`);
   };
 
   const [quantity, setQuantity] = useState(1);
@@ -120,12 +119,6 @@ const LipstickProductPage = () => {
               ⭐{selectedProduct.rating} ({selectedProduct.reviews} Reviews)
             </span>
           </div>
-
-          {/* <div className="mt-4 flex items-center space-x-2">
-            <button className="flex items-center bg-[#2a9d8f] text-white px-4 py-2 rounded-lg">
-              Purchase this item and get {selectedProduct.points} Points
-            </button>
-          </div> */}
 
           <div className="mt-5">
             <p className="text-lg font-semibold">Shades:</p>
